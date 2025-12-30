@@ -46,3 +46,51 @@ function renderDashboard() {
     dashboard.appendChild(bpDiv);
   });
 }
+document.addEventListener("DOMContentLoaded", () => {
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // Walk
+  document.getElementById("logWalkBtn").addEventListener("click", () => {
+    const duration = Number(document.getElementById("walkDuration").value);
+    const distance = Number(document.getElementById("walkDistance").value);
+    const hr = Number(document.getElementById("walkHR").value);
+    const calories = Number(document.getElementById("walkCalories").value);
+
+    logWalk(today, duration, distance, hr, null, calories, 1.4);
+    renderDashboard(today);
+  });
+
+  // Treadmill
+  document.getElementById("logTreadBtn").addEventListener("click", () => {
+    const duration = Number(document.getElementById("treadDuration").value);
+    const distance = Number(document.getElementById("treadDistance").value);
+    const hr = Number(document.getElementById("treadHR").value);
+    const calories = Number(document.getElementById("treadCalories").value);
+
+    logTreadmill(today, duration, distance, hr, null, calories, 1.4);
+    renderDashboard(today);
+  });
+
+  // Strength
+  document.getElementById("logStrengthBtn").addEventListener("click", () => {
+    const name = document.getElementById("strengthName").value;
+    const sets = Number(document.getElementById("strengthSets").value);
+    const reps = Number(document.getElementById("strengthReps").value);
+
+    logStrength(today, [{ name, sets, reps }]);
+    renderDashboard(today);
+  });
+
+  // Blood Pressure
+  document.getElementById("logBPBtn").addEventListener("click", () => {
+    const systolic = Number(document.getElementById("bpSystolic").value);
+    const diastolic = Number(document.getElementById("bpDiastolic").value);
+    const pulse = Number(document.getElementById("bpPulse").value);
+    const category = document.getElementById("bpCategory").value;
+
+    logBP(today, systolic, diastolic, pulse, category);
+    renderDashboard(today);
+  });
+
+});
