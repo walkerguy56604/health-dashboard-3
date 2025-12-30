@@ -1,3 +1,5 @@
+console.log("Health Dashboard 3 is alive 👊");
+
 /* =========================
    Health Dashboard 3
    Core App Skeleton
