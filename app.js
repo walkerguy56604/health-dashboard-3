@@ -10,6 +10,12 @@ const inMemoryStore = {
 // Load daily summary from Logs
 async function loadDailySummary(date) {
   try {
+    // Button click event to load today's summary
+document.getElementById('showDailySummaryBtn').addEventListener('click', () => {
+  // Use today's date (update format if needed)
+  const today = '2025_12_30';
+  loadDailySummary(today);
+});
     const response = await fetch(`Logs/daily_${date}.json`);
     const data = await response.json();
     
