@@ -1,23 +1,144 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Health Dashboard 3</title>
-</head>
-<body>
+console.log("Health Dashboard 3 is alive 👊");
 
-  <h1>Health Dashboard 3</h1>
+// =======================
+// In-memory store
+// =======================
+const healthData = {
+  walks: [],
+  treadmill: [],
+  strength: [],
+  bp: []
+};
 
-  <!-- Buttons -->
-  <button id="demoLogBtn">Add Demo Data</button>
-  <button id="dailySummaryBtn">Show Daily Summary</button>
+// =======================
+// Timestamp helper
+// =======================
+function now() {
+  return new Date().toISOString();
+}
 
-  <!-- Daily summary output -->
-  <div id="dailySummaryOutput"></div>
+// =======================
+// Log activities
+// =======================
+function logWalk(date, durationMinutes, distanceKm = 0, avgHR = null, maxHR = null, calories = 0, speed = 0) {
+  const entry = { date, durationMinutes, distanceKm, avgHR, maxHR, calories, speed };
+  healthData.walks.push(entry);
+  console.log("Walk logged:", entry);
+}
 
-  <!-- Link to your JS -->
-  <script src="app.js"></script>
+function logTreadmill(date, durationMinutes, distanceKm = 0, avgHR = null, maxHR = null, calories = 0, speed = 0) {
+  const entry = { date, durationMinutes, distanceKm, avgHR, maxHR, calories, speed };
+  healthData.treadmill.push(entry);
+  console.log("Treadmill logged:", entry);
+}
 
-</body>
-</html>
+function logStrength(date, exercises = []) {
+  const entry = { date, exercises };
+  healthData.strength.push(entry);
+  console.log("Strength session logged:", entry);
+}
+
+// =======================
+// Log blood pressure
+// =======================
+function logBP(date, systolic, diastolic, pulse, tag = "") {
+  const entry = { date, systolic, diastolic, pulse, tag };
+  healthData.bp.push(entry);
+  console.log("BP logged:", entry);
+}
+
+// =======================
+// Daily Summary
+// =======================
+function getDailySummary(date) {
+  const summary = {
+    walkDuration: 0,
+    treadmillDuration: 0,
+    strengthDuration: 0,
+    walkDistance: 0,
+    treadmillDistance: 0,
+    strengthExercises: 0,
+    caloriesBurned: 0,
+    avgHeartRate: null
+  };
+
+  let hrSum = 0, hrCount = 0;
+
+  healthData.walks.forEach(w => {
+    if (w.date === date) {
+      summary.walkDuration += w.durationMinutes;
+      summary.walkDistance += w.distanceKm;
+      summary.caloriesBurned += w.calories;
+      if (w.avgHR) { hrSum += w.avgHR; hrCount++; }
+    }
+  });
+
+  healthData.treadmill.forEach(t => {
+    if (t.date === date) {
+      summary.treadmillDuration += t.durationMinutes;
+      summary.treadmillDistance += t.distanceKm;
+      summary.caloriesBurned += t.calories;
+      if (t.avgHR) { hrSum += t.avgHR; hrCount++; }
+    }
+  });
+
+  healthData.strength.forEach(s => {
+    if (s.date === date) {
+      summary.strengthDuration += s.exercises.reduce((acc, ex) => acc + (ex.sets * ex.reps), 0); // total reps
+      summary.strengthExercises += s.exercises.length;
+    }
+  });
+
+  summary.avgHeartRate = hrCount ? Math.round(hrSum / hrCount) : "N/A";
+  return summary;
+}
+
+// =======================
+// Button listeners
+// =======================
+document.addEventListener("DOMContentLoaded", () => {
+  const dailyBtn = document.getElementById("dailySummaryBtn");
+  const demoBtn = document.getElementById("demoLogBtn");
+  const outputDiv = document.getElementById("dailySummaryOutput");
+
+  // Show daily summary
+  dailyBtn.addEventListener("click", () => {
+    const today = new Date().toISOString().split("T")[0];
+    const summary = getDailySummary(today);
+    outputDiv.innerHTML = `
+      <h3>Daily Summary for ${today}</h3>
+      <p><strong>Walk Duration:</strong> ${summary.walkDuration} min (${summary.walkDistance} km)</p>
+      <p><strong>Treadmill Duration:</strong> ${summary.treadmillDuration} min (${summary.treadmillDistance} km)</p>
+      <p><strong>Strength Duration:</strong> ${summary.strengthDuration} reps (${summary.strengthExercises} exercises)</p>
+      <p><strong>Calories Burned:</strong> ${summary.caloriesBurned}</p>
+      <p><strong>Average Heart Rate:</strong> ${summary.avgHeartRate}</p>
+    `;
+  });
+
+  // Add demo data & update summary immediately
+  demoBtn.addEventListener("click", () => {
+    const today = new Date().toISOString().split("T")[0];
+    logWalk(today, 5, 0.2, 107, 117, 12, 1.4);
+    logTreadmill(today, 10, 0.24, 107, 119, 12, 1.4);
+    logStrength(today, [
+      { name: "biceps", sets: 3, reps: 10 },
+      { name: "laterals", sets: 3, reps: 10 }
+    ]);
+    logBP(today, 122, 67, 90, "M Hypertension");
+
+    console.log("Demo data added:", healthData);
+
+    // Auto-update daily summary
+    const summary = getDailySummary(today);
+    outputDiv.innerHTML = `
+      <h3>Daily Summary for ${today}</h3>
+      <p><strong>Walk Duration:</strong> ${summary.walkDuration} min (${summary.walkDistance} km)</p>
+      <p><strong>Treadmill Duration:</strong> ${summary.treadmillDuration} min (${summary.treadmillDistance} km)</p>
+      <p><strong>Strength Duration:</strong> ${summary.strengthDuration} reps (${summary.strengthExercises} exercises)</p>
+      <p><strong>Calories Burned:</strong> ${summary.caloriesBurned}</p>
+      <p><strong>Average Heart Rate:</strong> ${summary.avgHeartRate}</p>
+    `;
+  });
+});
+
+console.log("Health Dashboard 3 ready");
