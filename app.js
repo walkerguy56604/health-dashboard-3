@@ -1,42 +1,23 @@
-// === Health Dashboard 3: Core App Skeleton ===
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Dashboard 3</title>
+</head>
+<body>
 
-// Simple in-memory store (later can save to JSON/CSV)
-const inMemoryStore = {
-  walks: [],
-  treadmill: [],
-  strength: []
-};
+  <h1>Health Dashboard 3</h1>
 
-// Load daily summary from Logs
-async function loadDailySummary(date) {
-  try {
-    const response = await fetch(`Logs/daily_${date}.json`);
-    const data = await response.json();
-    
-    const summary = data[0]; // Single entry per day for now
+  <!-- Buttons -->
+  <button id="demoLogBtn">Add Demo Data</button>
+  <button id="dailySummaryBtn">Show Daily Summary</button>
 
-    // Update HTML placeholders
-    document.getElementById('walkDuration').textContent = `${summary.walkDuration} min (${summary.walkDistance} km)`;
-    document.getElementById('treadmillDuration').textContent = `${summary.treadmillDuration} min (${summary.treadmillDistance} km)`;
-    document.getElementById('strengthDuration').textContent = `${summary.strengthDuration} min (${summary.strengthExercises} exercises)`;
-    document.getElementById('calories').textContent = summary.calories;
-    document.getElementById('avgHeartRate').textContent = summary.avgHeartRate || 'N/A';
+  <!-- Daily summary output -->
+  <div id="dailySummaryOutput"></div>
 
-    // Store in-memory if needed
-    inMemoryStore.walks.push({ date, duration: summary.walkDuration, distance: summary.walkDistance });
-    inMemoryStore.treadmill.push({ date, duration: summary.treadmillDuration, distance: summary.treadmillDistance });
-    inMemoryStore.strength.push({ date, duration: summary.strengthDuration, exercises: summary.strengthExercises });
-    
-    console.log(`Loaded daily summary for ${date}`);
-  } catch (err) {
-    console.error('Error loading daily summary:', err);
-  }
-}
+  <!-- Link to your JS -->
+  <script src="app.js"></script>
 
-// Example: load today (your first log)
-loadDailySummary('2025_12_30');
-
-// You can add more utility functions later:
-// addWalkEntry(date, duration, distance)
-// addTreadmillEntry(date, duration, distance)
-// addStrengthEntry(date, duration, exercises)
+</body>
+</html>
