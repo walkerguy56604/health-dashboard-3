@@ -1,61 +1,141 @@
-console.log("App.js loaded");
-document.addEventListener('DOMContentLoaded', () => {
-  // Your existing code goes here
-  // For example:
-  const btn = document.getElementById('showDailySummaryBtn');
-  if (btn) {
-    btn.addEventListener('click', () => {
-      const today = '2025_12_30';
-      loadDailySummary(today);
-    });
-  }
-});
+console.log("Health Dashboard 3 is alive 👊");
 
-// === Health Dashboard 3: Core App Skeleton ===
-
-// Simple in-memory store (later can save to JSON/CSV)
-const inMemoryStore = {
+// =======================
+// In-memory store with localStorage persistence
+// =======================
+let healthData = {
   walks: [],
   treadmill: [],
-  strength: []
+  strength: [],
+  bp: []
 };
 
-// Load daily summary from Logs
-async function loadDailySummary(date) {
-  try {
-    // Button click event to load today's summary
-document.getElementById('showDailySummaryBtn').addEventListener('click', () => {
-  // Use today's date (update format if needed)
-  const today = '2025_12_30';
-  loadDailySummary(today);
-});
-    const response = await fetch(`Logs/daily_${date}.json`);
-    const data = await response.json();
-    
-    const summary = data[0]; // Single entry per day for now
-
-    // Update HTML placeholders
-    document.getElementById('walkDuration').textContent = `${summary.walkDuration} min (${summary.walkDistance} km)`;
-    document.getElementById('treadmillDuration').textContent = `${summary.treadmillDuration} min (${summary.treadmillDistance} km)`;
-    document.getElementById('strengthDuration').textContent = `${summary.strengthDuration} min (${summary.strengthExercises} exercises)`;
-    document.getElementById('calories').textContent = summary.calories;
-    document.getElementById('avgHeartRate').textContent = summary.avgHeartRate || 'N/A';
-
-    // Store in-memory if needed
-    inMemoryStore.walks.push({ date, duration: summary.walkDuration, distance: summary.walkDistance });
-    inMemoryStore.treadmill.push({ date, duration: summary.treadmillDuration, distance: summary.treadmillDistance });
-    inMemoryStore.strength.push({ date, duration: summary.strengthDuration, exercises: summary.strengthExercises });
-    
-    console.log(`Loaded daily summary for ${date}`);
-  } catch (err) {
-    console.error('Error loading daily summary:', err);
-  }
+// Load from localStorage if exists
+if (localStorage.getItem("healthData")) {
+  healthData = JSON.parse(localStorage.getItem("healthData"));
+  console.log("Loaded health data from localStorage:", healthData);
 }
 
-// Example: load today (your first log)
-loadDailySummary('2025_12_30');
+// =======================
+// Timestamp helper
+// =======================
+function now() {
+  return new Date().toISOString();
+}
 
-// You can add more utility functions later:
-// addWalkEntry(date, duration, distance)
-// addTreadmillEntry(date, duration, distance)
-// addStrengthEntry(date, duration, exercises)
+// =======================
+// Logging functions
+// =======================
+function saveData() {
+  localStorage.setItem("healthData", JSON.stringify(healthData));
+}
+
+function logWalk(date, durationMinutes, distanceKm = 0, avgHR = null, maxHR = null, calories = 0, speed = 0) {
+  const entry = { date, durationMinutes, distanceKm, avgHR, maxHR, calories, speed };
+  healthData.walks.push(entry);
+  console.log("Walk logged:", entry);
+  saveData();
+}
+
+function logTreadmill(date, durationMinutes, distanceKm = 0, avgHR = null, maxHR = null, calories = 0, speed = 0) {
+  const entry = { date, durationMinutes, distanceKm, avgHR, maxHR, calories, speed };
+  healthData.treadmill.push(entry);
+  console.log("Treadmill logged:", entry);
+  saveData();
+}
+
+function logStrength(date, exercises = []) {
+  const entry = { date, exercises };
+  healthData.strength.push(entry);
+  console.log("Strength session logged:", entry);
+  saveData();
+}
+
+function logBP(date, systolic, diastolic, pulse, tag = "") {
+  const entry = { date, systolic, diastolic, pulse, tag };
+  healthData.bp.push(entry);
+  console.log("BP logged:", entry);
+  saveData();
+}
+
+// =======================
+// Daily Summary
+// =======================
+function getDailySummary(date) {
+  const summary = {
+    walkDuration: 0,
+    treadmillDuration: 0,
+    strengthDuration: 0,
+    walkDistance: 0,
+    treadmillDistance: 0,
+    strengthExercises: 0,
+    caloriesBurned: 0,
+    avgHeartRate: null
+  };
+
+  let hrSum = 0, hrCount = 0;
+
+  healthData.walks.forEach(w => {
+    if (w.date === date) {
+      summary.walkDuration += w.durationMinutes;
+      summary.walkDistance += w.distanceKm;
+      summary.caloriesBurned += w.calories;
+      if (w.avgHR) { hrSum += w.avgHR; hrCount++; }
+    }
+  });
+
+  healthData.treadmill.forEach(t => {
+    if (t.date === date) {
+      summary.treadmillDuration += t.durationMinutes;
+      summary.treadmillDistance += t.distanceKm;
+      summary.caloriesBurned += t.calories;
+      if (t.avgHR) { hrSum += t.avgHR; hrCount++; }
+    }
+  });
+
+  healthData.strength.forEach(s => {
+    if (s.date === date) {
+      summary.strengthDuration += s.exercises.reduce((acc, ex) => acc + (ex.sets * ex.reps), 0);
+      summary.strengthExercises += s.exercises.length;
+    }
+  });
+
+  summary.avgHeartRate = hrCount ? Math.round(hrSum / hrCount) : "N/A";
+
+  return summary;
+}
+
+// =======================
+// Button listener
+// =======================
+document.addEventListener("DOMContentLoaded", () => {
+  const dailyBtn = document.getElementById("dailySummaryBtn");
+  const outputDiv = document.getElementById("dailySummaryOutput");
+
+  dailyBtn.addEventListener("click", () => {
+    const today = new Date().toISOString().split("T")[0];
+    const summary = getDailySummary(today);
+
+    outputDiv.innerHTML = `
+      <h3>Daily Summary for ${today}</h3>
+      <p><strong>Walk Duration:</strong> ${summary.walkDuration} min (${summary.walkDistance} km)</p>
+      <p><strong>Treadmill Duration:</strong> ${summary.treadmillDuration} min (${summary.treadmillDistance} km)</p>
+      <p><strong>Strength Duration:</strong> ${summary.strengthDuration} reps (${summary.strengthExercises} exercises)</p>
+      <p><strong>Calories Burned:</strong> ${summary.caloriesBurned}</p>
+      <p><strong>Average Heart Rate:</strong> ${summary.avgHeartRate}</p>
+    `;
+  });
+});
+
+// =======================
+// Example usage (delete later if desired)
+// =======================
+logWalk("2025-12-30", 5, 0.2, 107, 117, 12, 1.4);
+logTreadmill("2025-12-30", 10, 0.24, 107, 119, 12, 1.4);
+logStrength("2025-12-30", [
+  { name: "biceps", sets: 3, reps: 10 },
+  { name: "laterals", sets: 3, reps: 10 }
+]);
+logBP("2025-12-30", 122, 67, 90, "M Hypertension");
+
+console.log("Current Health Data:", healthData);
