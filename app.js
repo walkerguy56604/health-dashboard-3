@@ -83,3 +83,11 @@ function showData() {
 /* ---- Example usage (safe to delete later) ---- */
 // logWalk(5, "Short walk after strength training");
 // logBP(128, 67, 96, "post-strength");
+// --- Recent activities ---
+const recentActivities = [
+  { type: "walk", duration: 10, distance: 0.24, avgHR: 107, maxHR: 117, speed: 1.4, calories: 12, time: "5:20-5:30" },
+  { type: "strength", duration: 22, exercises: { lateral: 3*10, biceps: 3*10 }, time: "3:50-4:12" }
+];
+
+// Merge with in-memory store
+healthData.activities.push(...recentActivities);
