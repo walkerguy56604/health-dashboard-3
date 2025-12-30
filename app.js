@@ -1,155 +1,113 @@
-console.log("Health Dashboard 3 is alive 👊");
+// Health Dashboard 3 - Core App Skeleton with Oct 29 Comparison
+// Date: 2025-12-30
 
-// =======================
-// In-memory store
-// =======================
 const healthData = {
-  walks: [],
-  treadmill: [],
-  strength: [],
-  bp: []
+  dailyLogs: [], // Daily log objects: { date, walk, treadmill, strength, calories, avgHR, maxHR, bp }
+  oct29Reference: {
+    walk: 14,
+    treadmill: 10,
+    strength: 6,
+    calories: 120,
+    avgHR: 90,
+    maxHR: 120,
+    bp: { systolic: 122, diastolic: 67, pulse: 90 }
+  }
 };
 
-// =======================
-// Timestamp helper
-// =======================
-function now() {
-  return new Date().toISOString();
+// ----- Utilities -----
+function formatDate(date) { return date.toISOString().split('T')[0]; }
+
+function getHRZone(avgHR) {
+  if (avgHR < 100) return 'green';
+  if (avgHR < 140) return 'yellow';
+  return 'red';
 }
 
-// =======================
-// Log activities
-// =======================
-function logWalk(date, durationMinutes, distanceKm = 0, avgHR = null, maxHR = null, calories = 0, speed = 0) {
-  const entry = { date, durationMinutes, distanceKm, avgHR, maxHR, calories, speed };
-  healthData.walks.push(entry);
-  updateHistory();
+function getComparisonColor(value, reference) {
+  if (value > reference) return 'green';   // Better than Oct29
+  if (value < reference) return 'red';     // Worse than Oct29
+  return 'gray';                            // Same as Oct29
 }
 
-function logTreadmill(date, durationMinutes, distanceKm = 0, avgHR = null, maxHR = null, calories = 0, speed = 0) {
-  const entry = { date, durationMinutes, distanceKm, avgHR, maxHR, calories, speed };
-  healthData.treadmill.push(entry);
-  updateHistory();
-}
+// ----- Rolling 7-Day Summary -----
+function getRolling7DaySummary() {
+  const today = new Date();
+  const sevenDaysAgo = new Date(today);
+  sevenDaysAgo.setDate(today.getDate() - 6);
 
-function logStrength(date, exercises = []) {
-  const entry = { date, exercises };
-  healthData.strength.push(entry);
-  updateHistory();
-}
-
-// =======================
-// Log blood pressure
-// =======================
-function logBP(date, systolic, diastolic, pulse, tag = "") {
-  const entry = { date, systolic, diastolic, pulse, tag };
-  healthData.bp.push(entry);
-  updateHistory();
-}
-
-// =======================
-// Daily Summary
-// =======================
-function getDailySummary(date) {
-  const summary = {
-    walkDuration: 0,
-    treadmillDuration: 0,
-    strengthDuration: 0,
-    walkDistance: 0,
-    treadmillDistance: 0,
-    strengthExercises: 0,
-    caloriesBurned: 0,
-    avgHeartRate: null
-  };
-
-  let hrSum = 0, hrCount = 0;
-
-  healthData.walks.forEach(w => {
-    if (w.date === date) {
-      summary.walkDuration += w.durationMinutes;
-      summary.walkDistance += w.distanceKm;
-      summary.caloriesBurned += w.calories;
-      if (w.avgHR) { hrSum += w.avgHR; hrCount++; }
-    }
+  const logs = healthData.dailyLogs.filter(log => {
+    const logDate = new Date(log.date);
+    return logDate >= sevenDaysAgo && logDate <= today;
   });
 
-  healthData.treadmill.forEach(t => {
-    if (t.date === date) {
-      summary.treadmillDuration += t.durationMinutes;
-      summary.treadmillDistance += t.distanceKm;
-      summary.caloriesBurned += t.calories;
-      if (t.avgHR) { hrSum += t.avgHR; hrCount++; }
-    }
+  const summary = { walk: 0, treadmill: 0, strength: 0, calories: 0, avgHR: 0, maxHR: 0, bp: { systolic:0, diastolic:0, pulse:0 }, count: logs.length };
+
+  logs.forEach(log => {
+    summary.walk += log.walk || 0;
+    summary.treadmill += log.treadmill || 0;
+    summary.strength += log.strength || 0;
+    summary.calories += log.calories || 0;
+    summary.avgHR += log.avgHR || 0;
+    summary.maxHR = Math.max(summary.maxHR, log.maxHR || 0);
+    summary.bp.systolic += log.bp?.systolic || 0;
+    summary.bp.diastolic += log.bp?.diastolic || 0;
+    summary.bp.pulse += log.bp?.pulse || 0;
   });
 
-  healthData.strength.forEach(s => {
-    if (s.date === date) {
-      summary.strengthDuration += s.exercises.reduce((acc, ex) => acc + (ex.sets * ex.reps), 0);
-      summary.strengthExercises += s.exercises.length;
-    }
-  });
+  if (summary.count > 0) {
+    summary.avgHR = Math.round(summary.avgHR / summary.count);
+    summary.bp.systolic = Math.round(summary.bp.systolic / summary.count);
+    summary.bp.diastolic = Math.round(summary.bp.diastolic / summary.count);
+    summary.bp.pulse = Math.round(summary.bp.pulse / summary.count);
+  }
 
-  summary.avgHeartRate = hrCount ? Math.round(hrSum / hrCount) : "N/A";
   return summary;
 }
 
-// =======================
-// Render daily summary
-// =======================
-function renderDailySummary(date) {
-  const summary = getDailySummary(date);
-  const outputDiv = document.getElementById("dailySummaryOutput");
+// ----- Render Dashboard -----
+function renderDashboard() {
+  const container = document.getElementById('dashboard');
+  container.innerHTML = '';
 
-  outputDiv.innerHTML = `
-    <h3>Daily Summary for ${date}</h3>
-    <div><strong>Walk Duration:</strong> ${summary.walkDuration} min (${summary.walkDistance} km)</div>
-    <div><strong>Treadmill Duration:</strong> ${summary.treadmillDuration} min (${summary.treadmillDistance} km)</div>
-    <div><strong>Strength Duration:</strong> ${summary.strengthDuration} reps (${summary.strengthExercises} exercises)</div>
-    <div><strong>Calories Burned:</strong> ${summary.caloriesBurned}</div>
-    <div><strong>Average Heart Rate:</strong> ${summary.avgHeartRate}</div>
+  const latestLog = healthData.dailyLogs[healthData.dailyLogs.length - 1] || {};
+
+  // --- Daily Summary ---
+  const dailyDiv = document.createElement('div');
+  dailyDiv.innerHTML = `
+    <h2>Daily Summary for ${latestLog.date || 'N/A'}</h2>
+    <p>Walk Duration: <span style="color:${getComparisonColor(latestLog.walk || 0, healthData.oct29Reference.walk)}">${latestLog.walk || 0} min</span></p>
+    <p>Treadmill Duration: <span style="color:${getComparisonColor(latestLog.treadmill || 0, healthData.oct29Reference.treadmill)}">${latestLog.treadmill || 0} min</span></p>
+    <p>Strength Duration: <span style="color:${getComparisonColor(latestLog.strength || 0, healthData.oct29Reference.strength)}">${latestLog.strength || 0} reps</span></p>
+    <p>Calories Burned: <span style="color:${getComparisonColor(latestLog.calories || 0, healthData.oct29Reference.calories)}">${latestLog.calories || 0}</span></p>
+    <p>Average Heart Rate: <span style="color:${getComparisonColor(latestLog.avgHR || 0, healthData.oct29Reference.avgHR)}">${latestLog.avgHR || 'N/A'}</span></p>
+    <p>Blood Pressure: <span style="color:${getComparisonColor(latestLog.bp?.systolic || 0, healthData.oct29Reference.bp.systolic)}">${latestLog.bp?.systolic || 'N/A'}/${latestLog.bp?.diastolic || 'N/A'} (${latestLog.bp?.pulse || 'N/A'})</span></p>
   `;
+  container.appendChild(dailyDiv);
+
+  // --- 7-Day Summary ---
+  const weekly = getRolling7DaySummary();
+  const weeklyDiv = document.createElement('div');
+  weeklyDiv.innerHTML = `
+    <h2>Rolling 7-Day Summary</h2>
+    <p>Total Walk: <span style="color:${getComparisonColor(weekly.walk, healthData.oct29Reference.walk)}">${weekly.walk} min</span></p>
+    <p>Total Treadmill: <span style="color:${getComparisonColor(weekly.treadmill, healthData.oct29Reference.treadmill)}">${weekly.treadmill} min</span></p>
+    <p>Total Strength: <span style="color:${getComparisonColor(weekly.strength, healthData.oct29Reference.strength)}">${weekly.strength} reps</span></p>
+    <p>Total Calories: <span style="color:${getComparisonColor(weekly.calories, healthData.oct29Reference.calories)}">${weekly.calories}</span></p>
+    <p>Average HR: <span style="color:${getComparisonColor(weekly.avgHR, healthData.oct29Reference.avgHR)}">${weekly.avgHR}</span></p>
+    <p>Average BP: <span style="color:${getComparisonColor(weekly.bp.systolic, healthData.oct29Reference.bp.systolic)}">${weekly.bp.systolic}/${weekly.bp.diastolic} (${weekly.bp.pulse})</span></p>
+  `;
+  container.appendChild(weeklyDiv);
+
+  // --- Monthly Summary ---
+  const monthlyDiv = document.createElement('div');
+  monthlyDiv.innerHTML = `<h2>Monthly Summary</h2><p>Coming soon...</p>`;
+  container.appendChild(monthlyDiv);
+
+  // --- Oct 29 Comparison ---
+  const compareDiv = document.createElement('div');
+  compareDiv.innerHTML = `<h2>Comparison to Oct 29, 2025</h2><p>See colored indicators above in daily and 7-day summaries.</p>`;
+  container.appendChild(compareDiv);
 }
 
-// =======================
-// Render scrollable history
-// =======================
-function updateHistory() {
-  const historyDiv = document.getElementById("historyList");
-  historyDiv.innerHTML = "";
-
-  const allDates = new Set([
-    ...healthData.walks.map(w => w.date),
-    ...healthData.treadmill.map(t => t.date),
-    ...healthData.strength.map(s => s.date),
-    ...healthData.bp.map(b => b.date)
-  ]);
-
-  const sortedDates = Array.from(allDates).sort((a, b) => new Date(b) - new Date(a));
-
-  sortedDates.forEach(date => {
-    const summary = getDailySummary(date);
-    const div = document.createElement("div");
-    div.style.borderBottom = "1px solid #ccc";
-    div.style.marginBottom = "5px";
-    div.style.paddingBottom = "5px";
-    div.innerHTML = `
-      <strong>${date}</strong> - Walk: ${summary.walkDuration} min, Treadmill: ${summary.treadmillDuration} min, Strength: ${summary.strengthExercises} exercises, Calories: ${summary.caloriesBurned}, Avg HR: ${summary.avgHeartRate}
-    `;
-    historyDiv.appendChild(div);
-  });
-}
-
-// =======================
-// Hook up date picker
-// =======================
-document.addEventListener("DOMContentLoaded", () => {
-  const datePicker = document.getElementById("datePicker");
-  const today = new Date().toISOString().split("T")[0];
-  datePicker.value = today;
-  renderDailySummary(today);
-
-  datePicker.addEventListener("change", () => {
-    const selectedDate = datePicker.value;
-    renderDailySummary(selectedDate);
-  });
-});
+// ----- Initial Render -----
+renderDashboard();
