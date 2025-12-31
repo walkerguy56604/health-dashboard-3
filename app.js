@@ -4,8 +4,22 @@
 import { dailyLogs } from './data/dailyLogs.js';
 
 // =======================
-// Update Today's Entries (latest post-strength)
-dailyLogs["2025-12-31"].bloodPressure.push({ systolic: 137, diastolic: 72, heartRate: 86 });
+// Update Today's Entries (fully merged)
+// =======================
+dailyLogs["2025-12-31"] = {
+  bloodPressure: [
+    { systolic: 130, diastolic: 69, heartRate: 80 },
+    { systolic: 121, diastolic: 67, heartRate: 80 },
+    { systolic: 144, diastolic: 75, heartRate: 87 },
+    { systolic: 137, diastolic: 72, heartRate: 86 } // latest post-strength
+  ],
+  glucose: [{ value: 5.4 }],
+  walk: 5,
+  treadmill: 10,
+  strength: 16,
+  calories: 12,
+  heartRate: 85
+};
 
 // =======================
 // Baseline
@@ -272,10 +286,9 @@ appleInput.onchange = (e) => {
 exportContainer.appendChild(appleInput);
 
 // =======================
-// Apple Health Mapper (example)
+// Apple Health Mapper
 // =======================
 export function mapAppleHealthData(jsonData){
-  // Map imported data to dailyLogs format
   jsonData.forEach(entry => {
     const date = entry.date;
     if(!dailyLogs[date]) dailyLogs[date] = { bloodPressure: [], glucose: [], walk:0, treadmill:0, strength:0, calories:0, heartRate:0 };
