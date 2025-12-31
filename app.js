@@ -1,3 +1,4 @@
+import { dailyLogs } from './data/dailyLogs.js';
 // =======================
 // Historical Data + Today's Entry
 // =======================
