@@ -11,6 +11,22 @@ const referenceDay = {
 
 // Example daily logs
 const dailyLogs = {
+  function ensureDailyLog(date) {
+  if (!dailyLogs[date]) {
+    dailyLogs[date] = {
+      walk: 0,
+      treadmill: 0,
+      strength: 0,
+      calories: 0,
+      heartRate: 0,
+      bloodPressure: {
+        systolic: 0,
+        diastolic: 0,
+        iHB: 0
+      }
+    };
+  }
+}
   '2025-12-30': {
     walk: 40,
     treadmill: 10,
