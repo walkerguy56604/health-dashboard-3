@@ -2,99 +2,14 @@
 // Historical Data
 // =======================
 const dailyLogs = {
-  "2024-10-29": {
-    bloodPressure: [
-      { systolic: 108, diastolic: 62, heartRate: 69, note: "IHB" },
-      { systolic: 118, diastolic: 59, heartRate: 72, note: "IHB" }
-    ],
-    glucose: [],
-    walk: 40,
-    treadmill: 0,
-    strength: 30,
-    calories: 0,
-    heartRate: 75
-  },
-  "2024-11-01": {
-    bloodPressure: [
-      { systolic: 114, diastolic: 65, heartRate: 77 },
-      { systolic: 112, diastolic: 59, heartRate: 75 }
-    ],
-    glucose: [],
-    walk: 30,
-    treadmill: 0,
-    strength: 30,
-    calories: 0,
-    heartRate: 76
-  },
-  "2024-11-04": {
-    bloodPressure: [
-      { systolic: 111, diastolic: 58, heartRate: 78 },
-      { systolic: 122, diastolic: 68, heartRate: 76 }
-    ],
-    glucose: [{ value: 6.7 }],
-    walk: 20,
-    treadmill: 0,
-    strength: 30,
-    calories: 0,
-    heartRate: 77
-  },
-  "2024-11-07": {
-    bloodPressure: [],
-    glucose: [{ value: 5.1 }],
-    walk: 20,
-    treadmill: 0,
-    strength: 0,
-    calories: 0,
-    heartRate: 72
-  },
-  "2024-11-08": {
-    bloodPressure: [
-      { systolic: 112, diastolic: 61, heartRate: 77 },
-      { systolic: 119, diastolic: 71, heartRate: 74 }
-    ],
-    glucose: [],
-    walk: 25,
-    treadmill: 0,
-    strength: 30,
-    calories: 0,
-    heartRate: 75
-  },
-  "2024-11-11": {
-    bloodPressure: [
-      { systolic: 117, diastolic: 58, heartRate: 76 },
-      { systolic: 132, diastolic: 69, heartRate: 76 }
-    ],
-    glucose: [{ value: 6 }],
-    walk: 30,
-    treadmill: 0,
-    strength: 30,
-    calories: 0,
-    heartRate: 76
-  },
-  "2024-11-12": {
-    bloodPressure: [],
-    glucose: [{ value: 6.1, time: "morning" }],
-    walk: 20,
-    treadmill: 0,
-    strength: 0,
-    calories: 0,
-    heartRate: 73
-  },
-  "2024-11-15": {
-    bloodPressure: [
-      { systolic: 118, diastolic: 69, heartRate: 83 },
-      { systolic: 120, diastolic: 66, heartRate: 82 }
-    ],
-    glucose: [
-      { value: 7.7, time: "5:00 AM" },
-      { value: 4.6, time: "6:30 AM" }
-    ],
-    walk: 40,
-    treadmill: 10,
-    strength: 30,
-    calories: 11,
-    heartRate: 100
-  }
+  "2024-10-29": { bloodPressure: [{ systolic: 108, diastolic: 62, heartRate: 69, note: "IHB" }, { systolic: 118, diastolic: 59, heartRate: 72, note: "IHB" }], glucose: [], walk: 40, treadmill: 0, strength: 30, calories: 0, heartRate: 75 },
+  "2024-11-01": { bloodPressure: [{ systolic: 114, diastolic: 65, heartRate: 77 }, { systolic: 112, diastolic: 59, heartRate: 75 }], glucose: [], walk: 30, treadmill: 0, strength: 30, calories: 0, heartRate: 76 },
+  "2024-11-04": { bloodPressure: [{ systolic: 111, diastolic: 58, heartRate: 78 }, { systolic: 122, diastolic: 68, heartRate: 76 }], glucose: [{ value: 6.7 }], walk: 20, treadmill: 0, strength: 30, calories: 0, heartRate: 77 },
+  "2024-11-07": { bloodPressure: [], glucose: [{ value: 5.1 }], walk: 20, treadmill: 0, strength: 0, calories: 0, heartRate: 72 },
+  "2024-11-08": { bloodPressure: [{ systolic: 112, diastolic: 61, heartRate: 77 }, { systolic: 119, diastolic: 71, heartRate: 74 }], glucose: [], walk: 25, treadmill: 0, strength: 30, calories: 0, heartRate: 75 },
+  "2024-11-11": { bloodPressure: [{ systolic: 117, diastolic: 58, heartRate: 76 }, { systolic: 132, diastolic: 69, heartRate: 76 }], glucose: [{ value: 6 }], walk: 30, treadmill: 0, strength: 30, calories: 0, heartRate: 76 },
+  "2024-11-12": { bloodPressure: [], glucose: [{ value: 6.1, time: "morning" }], walk: 20, treadmill: 0, strength: 0, calories: 0, heartRate: 73 },
+  "2024-11-15": { bloodPressure: [{ systolic: 118, diastolic: 69, heartRate: 83 }, { systolic: 120, diastolic: 66, heartRate: 82 }], glucose: [{ value: 7.7, time: "5:00 AM" }, { value: 4.6, time: "6:30 AM" }], walk: 40, treadmill: 10, strength: 30, calories: 11, heartRate: 100 }
 };
 
 // =======================
@@ -116,45 +31,31 @@ function getBPColor(cat) {
 }
 
 // =======================
+// Helper: Last N Dates
+// =======================
+function getLastNDates(endDate, n) {
+  const allDates = Object.keys(dailyLogs).sort();
+  const idx = allDates.indexOf(endDate);
+  if (idx === -1) return [];
+  return allDates.slice(Math.max(0, idx - n + 1), idx + 1);
+}
+
+// =======================
 // 7-Day Rolling Averages
 // =======================
 function get7DayRolling(date) {
-  const dates = Object.keys(dailyLogs).sort();
-  const idx = dates.indexOf(date);
-  if (idx === -1) return null;
+  const windowDates = getLastNDates(date, 7);
+  let sums = { sys:0, dia:0, bpCount:0, glucose:0, glucoseCount:0, walk:0, treadmill:0, strength:0, calories:0, heartRate:0, hrCount:0 };
 
-  const window = dates.slice(Math.max(0, idx - 6), idx + 1);
-
-  let sums = {
-    sys: 0, dia: 0, bpCount: 0,
-    glucose: 0, glucoseCount: 0,
-    walk: 0, treadmill: 0,
-    strength: 0, calories: 0,
-    heartRate: 0, hrCount: 0
-  };
-
-  window.forEach(d => {
+  windowDates.forEach(d => {
     const day = dailyLogs[d];
-
-    day.bloodPressure.forEach(bp => {
-      sums.sys += bp.systolic;
-      sums.dia += bp.diastolic;
-      sums.bpCount++;
-    });
-
-    day.glucose.forEach(g => {
-      sums.glucose += g.value ?? g;
-      sums.glucoseCount++;
-    });
-
-    if (day.walk) sums.walk += day.walk;
-    if (day.treadmill) sums.treadmill += day.treadmill;
-    if (day.strength) sums.strength += day.strength;
-    if (day.calories) sums.calories += day.calories;
-    if (day.heartRate) {
-      sums.heartRate += day.heartRate;
-      sums.hrCount++;
-    }
+    day.bloodPressure.forEach(bp => { sums.sys += bp.systolic; sums.dia += bp.diastolic; sums.bpCount++; });
+    day.glucose.forEach(g => { sums.glucose += g.value ?? g; sums.glucoseCount++; });
+    sums.walk += day.walk ?? 0;
+    sums.treadmill += day.treadmill ?? 0;
+    sums.strength += day.strength ?? 0;
+    sums.calories += day.calories ?? 0;
+    if(day.heartRate){ sums.heartRate += day.heartRate; sums.hrCount++; }
   });
 
   return {
@@ -175,24 +76,26 @@ function get7DayRolling(date) {
 function renderDailySummary(date) {
   const out = document.getElementById("dailySummaryOutput");
   const d = dailyLogs[date];
-  if (!d) return;
+  if(!d) { out.innerHTML = `<div>No data for ${date}</div>`; return; }
 
-  let html = `<h3>${date}</h3><h4>Blood Pressure</h4>`;
+  let html = `<h3>${date}</h3>`;
 
+  // BP
+  html += `<h4>Blood Pressure</h4>`;
   d.bloodPressure.length
-    ? d.bloodPressure.forEach((bp, i) => {
-        const cat = getBPCategory(bp.systolic, bp.diastolic);
-        html += `<div style="color:${getBPColor(cat)}">
-          BP #${i+1}: ${bp.systolic}/${bp.diastolic} HR:${bp.heartRate} (${cat})
-        </div>`;
+    ? d.bloodPressure.forEach((bp,i)=>{
+        const cat = getBPCategory(bp.systolic,bp.diastolic);
+        html += `<div style="color:${getBPColor(cat)}">BP #${i+1}: ${bp.systolic}/${bp.diastolic} HR:${bp.heartRate} (${cat})</div>`;
       })
     : html += `<div>No BP recorded</div>`;
 
+  // Glucose
   html += `<h4>Glucose</h4>`;
   d.glucose.length
-    ? d.glucose.forEach(g => html += `<div>${g.value ?? g} mmol/L</div>`)
+    ? d.glucose.forEach((g,i)=> html += `<div>${g.value??g} mmol/L${g.time? " (Time:"+g.time+")":""}</div>`)
     : html += `<div>No glucose</div>`;
 
+  // Activity
   html += `
     <h4>Activity</h4>
     <div>Walk: ${d.walk} min</div>
@@ -202,10 +105,11 @@ function renderDailySummary(date) {
     <div>Avg HR: ${d.heartRate}</div>
   `;
 
+  // 7-day rolling
   const r = get7DayRolling(date);
-  if (r) {
+  if(r){
     html += `
-      <h4>7‑Day Rolling Averages</h4>
+      <h4>7-Day Rolling Averages</h4>
       <div>BP: ${r.bpSys}/${r.bpDia}</div>
       <div>Glucose: ${r.glucose}</div>
       <div>Walk: ${r.walk} min</div>
@@ -220,93 +124,63 @@ function renderDailySummary(date) {
 }
 
 // =======================
-// Date Picker + History
+// History + Date Picker
 // =======================
 const picker = document.getElementById("datePicker");
 const history = document.getElementById("historyList");
 
-picker.addEventListener("change", e => {
+picker.addEventListener("change", e=>{
   const date = e.target.value;
   renderDailySummary(date);
+  renderBPTrends(date,7);
 
-  if (![...history.children].some(b => b.dataset.date === date)) {
-    const btn = document.createElement("button");
-    btn.textContent = date;
-    btn.dataset.date = date;
-    btn.onclick = () => renderDailySummary(date);
+  if(![...history.children].some(b=>b.dataset.date===date)){
+    const btn=document.createElement("button");
+    btn.textContent=date;
+    btn.dataset.date=date;
+    btn.onclick=()=>{ renderDailySummary(date); renderBPTrends(date,7); };
     history.prepend(btn);
   }
 });
+
 // =======================
-// Blood Pressure Trends Chart
+// BP Trend Chart (all readings per day)
 // =======================
-let bpChart = null;
+let bpChart=null;
 
-function renderBPTrends(endDate, days = 7) {
-  const lastDays = getLastNDates(endDate, days);
+function renderBPTrends(endDate, days=7){
+  const lastDays = getLastNDates(endDate,days);
+  const labels=[];
+  const datasets=[];
 
-  const labels = [];
-  const systolicData = [];
-  const diastolicData = [];
-  const colors = [];
-
-  lastDays.forEach(date => {
-    labels.push(date);
-    const day = dailyLogs[date] || { bloodPressure: [] };
-    
-    if (day.bloodPressure.length > 0) {
-      // Use first BP of the day for trend
-      const bp = day.bloodPressure[0];
-      systolicData.push(bp.systolic);
-      diastolicData.push(bp.diastolic);
-      const cat = getBPCategory(bp.systolic, bp.diastolic);
-      colors.push(getBPColor(cat));
-    } else {
-      systolicData.push(null);
-      diastolicData.push(null);
-      colors.push('gray');
+  // Prepare datasets: one per BP reading per day
+  lastDays.forEach(date=>{
+    const day=dailyLogs[date] || { bloodPressure: [] };
+    day.bloodPressure.forEach((bp,i)=>{
+      if(!datasets[i]) datasets[i]={ label:`BP Reading ${i+1}`, data:[], borderColor:i%2===0?'red':'blue', backgroundColor:'rgba(0,0,0,0)', pointBackgroundColor:[] };
+      datasets[i].data.push({x:date,y:bp.systolic});
+      const cat=getBPCategory(bp.systolic,bp.diastolic);
+      datasets[i].pointBackgroundColor.push(getBPColor(cat));
+    });
+    // Fill null for missing readings
+    for(let j=day.bloodPressure.length;j<datasets.length;j++){
+      datasets[j].data.push({x:date,y:null});
+      datasets[j].pointBackgroundColor.push('gray');
     }
   });
 
-  const ctx = document.getElementById('trendChart').getContext('2d');
-
-  if (bpChart) bpChart.destroy();
-
-  bpChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Systolic',
-          data: systolicData,
-          borderColor: 'red',
-          backgroundColor: 'rgba(255,0,0,0.2)',
-          tension: 0.3,
-          pointBackgroundColor: colors
-        },
-        {
-          label: 'Diastolic',
-          data: diastolicData,
-          borderColor: 'blue',
-          backgroundColor: 'rgba(0,0,255,0.2)',
-          tension: 0.3,
-          pointBackgroundColor: colors
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: 'top' } },
-      scales: {
-        y: { beginAtZero: false, suggestedMin: 50, suggestedMax: 160 }
+  const ctx=document.getElementById("trendChart").getContext("2d");
+  if(bpChart) bpChart.destroy();
+  bpChart=new Chart(ctx,{
+    type:'line',
+    data:{ datasets:datasets },
+    options:{
+      responsive:true,
+      plugins:{ legend:{ position:'top' } },
+      scales:{
+        x:{ type:'category', labels:lastDays },
+        y:{ beginAtZero:false, suggestedMin:50, suggestedMax:160 }
       }
     }
   });
 }
-
-// Auto-render BP trend when date is selected
-picker.addEventListener("change", e => {
-  const date = e.target.value;
-  renderBPTrends(date, 7);
-});
