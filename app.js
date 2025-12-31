@@ -1,5 +1,5 @@
 // =======================
-// Historical Data
+// Historical Data + Daily Logs
 // =======================
 const dailyLogs = {
   "2024-10-29": { bloodPressure: [{ systolic: 108, diastolic: 62, heartRate: 69, note: "IHB" }, { systolic: 118, diastolic: 59, heartRate: 72, note: "IHB" }], glucose: [], walk: 40, treadmill: 0, strength: 30, calories: 0, heartRate: 75 },
@@ -9,9 +9,7 @@ const dailyLogs = {
   "2024-11-08": { bloodPressure: [{ systolic: 112, diastolic: 61, heartRate: 77 }, { systolic: 119, diastolic: 71, heartRate: 74 }], glucose: [], walk: 25, treadmill: 0, strength: 30, calories: 0, heartRate: 75 },
   "2024-11-11": { bloodPressure: [{ systolic: 117, diastolic: 58, heartRate: 76 }, { systolic: 132, diastolic: 69, heartRate: 76 }], glucose: [{ value: 6 }], walk: 30, treadmill: 0, strength: 30, calories: 0, heartRate: 76 },
   "2024-11-12": { bloodPressure: [], glucose: [{ value: 6.1, time: "morning" }], walk: 20, treadmill: 0, strength: 0, calories: 0, heartRate: 73 },
-  "2024-11-15": { bloodPressure: [{ systolic: 118, diastolic: 69, heartRate: 83 }, { systolic: 120, diastolic: 66, heartRate: 82 }], glucose: [{ value: 7.7, time: "5:00 AM" }, { value: 4.6, time: "6:30 AM" }], walk: 40, treadmill: 10, strength: 30, calories: 11, heartRate: 100 },
-  "2024-11-16": { bloodPressure: [{ systolic: 125, diastolic: 71, heartRate: 91 }], glucose: [{ value: 6.3 }], walk: 35, treadmill: 15, strength: 20, calories: 12, heartRate: 92 },
-  "2025-12-30": { bloodPressure: [{ systolic: 125, diastolic: 71, heartRate: 91 }], glucose: [], walk: 0, treadmill: 0, strength: 15, calories: 0, heartRate: 91 } // Today's entry
+  "2024-11-15": { bloodPressure: [{ systolic: 118, diastolic: 69, heartRate: 83 }, { systolic: 120, diastolic: 66, heartRate: 82 }], glucose: [{ value: 7.7, time: "5:00 AM" }, { value: 4.6, time: "6:30 AM" }], walk: 40, treadmill: 10, strength: 30, calories: 11, heartRate: 100 }
 };
 
 // =======================
@@ -20,7 +18,7 @@ const dailyLogs = {
 const baselineDate = "2024-10-29";
 
 // =======================
-// BP helpers
+// BP Helpers
 // =======================
 function getBPCategory(s, d) {
   if (s >= 140 || d >= 90) return "H";
@@ -40,6 +38,17 @@ function getLastNDates(endDate, n) {
   const idx = allDates.indexOf(endDate);
   if (idx === -1) return [];
   return allDates.slice(Math.max(0, idx - n + 1), idx + 1);
+}
+
+// =======================
+// Auto-create today's log if missing
+// =======================
+function ensureTodayLog() {
+  const today = new Date().toISOString().split('T')[0];
+  if (!dailyLogs[today]) {
+    dailyLogs[today] = { bloodPressure: [], glucose: [], walk:0, treadmill:0, strength:0, calories:0, heartRate:0 };
+  }
+  return today;
 }
 
 // =======================
@@ -131,6 +140,18 @@ function renderDailySummary(date) {
 const picker = document.getElementById("datePicker");
 const history = document.getElementById("historyList");
 
+// Auto-add today's button if missing
+const today = ensureTodayLog();
+if (![...history.children].some(b => b.dataset.date === today)) {
+  const btn = document.createElement("button");
+  btn.textContent = "Today";
+  btn.dataset.date = today;
+  btn.onclick = ()=>{ renderDailySummary(today); renderBPTrends(today,7); };
+  history.prepend(btn);
+  renderDailySummary(today);
+  renderBPTrends(today,7);
+}
+
 picker.addEventListener("change", e=>{
   const date = e.target.value;
   renderDailySummary(date);
@@ -146,14 +167,16 @@ picker.addEventListener("change", e=>{
 });
 
 // =======================
-// BP Trend Chart
+// BP Trend Chart (all readings per day)
 // =======================
 let bpChart=null;
+
 function renderBPTrends(endDate, days=7){
   const lastDays = getLastNDates(endDate,days);
   const labels=[];
   const datasets=[];
 
+  // Prepare datasets: one per BP reading per day
   lastDays.forEach(date=>{
     const day=dailyLogs[date] || { bloodPressure: [] };
     day.bloodPressure.forEach((bp,i)=>{
@@ -162,6 +185,7 @@ function renderBPTrends(endDate, days=7){
       const cat=getBPCategory(bp.systolic,bp.diastolic);
       datasets[i].pointBackgroundColor.push(getBPColor(cat));
     });
+    // Fill null for missing readings
     for(let j=day.bloodPressure.length;j<datasets.length;j++){
       datasets[j].data.push({x:date,y:null});
       datasets[j].pointBackgroundColor.push('gray');
@@ -183,80 +207,3 @@ function renderBPTrends(endDate, days=7){
     }
   });
 }
-
-// =======================
-// Export CSV
-// =======================
-function exportCSV(){
-  let csv = "Date,BP_Sys,BP_Dia,HR,Glucose,Walk,Treadmill,Strength,Calories\n";
-  Object.keys(dailyLogs).sort().forEach(date=>{
-    const d=dailyLogs[date];
-    const bp=d.bloodPressure[0]||{systolic:"",diastolic:"",heartRate:""};
-    const glucose=d.glucose[0]?.value ?? "";
-    csv += `${date},${bp.systolic},${bp.diastolic},${bp.heartRate},${glucose},${d.walk},${d.treadmill},${d.strength},${d.calories}\n`;
-  });
-  const blob=new Blob([csv],{type:"text/csv"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url; a.download="health_data.csv"; a.click();
-  URL.revokeObjectURL(url);
-}
-
-// =======================
-// Export Apple Health JSON
-// =======================
-function mapToAppleHealth(date){
-  const entry=dailyLogs[date];
-  if(!entry) return [];
-  const healthData=[];
-  entry.bloodPressure.forEach(bp=>{
-    healthData.push({ type:"HKQuantityTypeIdentifierBloodPressureSystolic", value:bp.systolic, date });
-    healthData.push({ type:"HKQuantityTypeIdentifierBloodPressureDiastolic", value:bp.diastolic, date });
-    healthData.push({ type:"HKQuantityTypeIdentifierHeartRate", value:bp.heartRate, date });
-  });
-  entry.glucose.forEach(g=>{
-    healthData.push({ type:"HKQuantityTypeIdentifierBloodGlucose", value:g.value, date:g.time?`${date}T${g.time}`:date });
-  });
-  if(entry.walk) healthData.push({ type:"HKQuantityTypeIdentifierStepCount", value:entry.walk*100, date });
-  if(entry.treadmill) healthData.push({ type:"HKQuantityTypeIdentifierDistanceWalkingRunning", value:entry.treadmill, date });
-  if(entry.strength) healthData.push({ type:"HKWorkoutTypeFunctionalStrengthTraining", value:entry.strength, date });
-  if(entry.calories) healthData.push({ type:"HKQuantityTypeIdentifierActiveEnergyBurned", value:entry.calories, date });
-  return healthData;
-}
-
-function exportAppleHealthJSON(){
-  const date = picker.value;
-  const data = mapToAppleHealth(date);
-  const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url; a.download=`health_data_${date}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// =======================
-// Auto-create today's button
-// =======================
-const today = new Date().toISOString().split('T')[0];
-if(!dailyLogs[today]){
-  dailyLogs[today] = { bloodPressure: [], glucose: [], walk:0, treadmill:0, strength:0, calories:0, heartRate:0 };
-}
-if(![...history.children].some(b=>b.dataset.date===today)){
-  const btn=document.createElement("button");
-  btn.textContent=today;
-  btn.dataset.date=today;
-  btn.onclick=()=>{ renderDailySummary(today); renderBPTrends(today,7); };
-  history.prepend(btn);
-}
-
-// =======================
-// Export Buttons UI
-// =======================
-const exportButtons = document.createElement('div');
-exportButtons.style.marginTop = '20px';
-exportButtons.innerHTML = `
-  <button onclick="exportCSV()">Export CSV</button>
-  <button onclick="exportAppleHealthJSON()">Export Apple Health JSON</button>
-`;
-document.body.insertBefore(exportButtons, document.getElementById('trendContainer'));
