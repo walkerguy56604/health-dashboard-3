@@ -12,33 +12,12 @@
     }
     h1 { text-align: center; }
     label, input, button { display: block; margin-bottom: 10px; font-size: 16px; }
-    #dailySummaryOutput {
-      margin-top: 20px;
-      padding: 15px;
-      background-color: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    #historyList {
-      margin-top: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-    #historyList button {
-      padding: 5px 10px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    #trendContainer {
-      margin-top: 30px;
-      padding: 15px;
-      background-color: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
+    #dailySummaryOutput { margin-top: 20px; padding: 15px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    #historyList { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 5px; }
+    #historyList button { padding: 5px 10px; font-size: 14px; cursor: pointer; }
+    #trendContainer { margin-top: 30px; padding: 15px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
     canvas { width: 100%; height: 250px; }
-    #exportContainer { margin-top: 15px; }
+    #exportContainer { margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -63,21 +42,25 @@
 
   <!-- Export & Apple Health Buttons -->
   <div id="exportContainer">
-    <button id="exportCSVBtn">Export CSV</button>
+    <button id="exportCSVBtn">Export Selected Date CSV</button>
     <input type="file" id="appleHealthImport" accept=".json">
   </div>
 
   <!-- Scripts -->
-  <script type="module" src="app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="app.js"></script>
 
-  <script>
-    // CSV Export Button
+  <script type="module">
+    import { mapAppleHealthData } from './app.js'; // ensure this function is exported from app.js if needed
+
+    // CSV Export Button (for selected date)
     document.getElementById("exportCSVBtn").addEventListener("click", () => {
-      const picker = document.getElementById("datePicker");
-      const selectedDate = picker.value;
-      if (!selectedDate) { alert("Please select a date first!"); return; }
-      if (typeof exportSelectedCSV === "function") exportSelectedCSV(selectedDate);
+      const selectedDate = document.getElementById("datePicker").value;
+      if (selectedDate) {
+        exportSelectedCSV(selectedDate); // assumes function is exported from app.js
+      } else {
+        alert("Please select a date!");
+      }
     });
 
     // Apple Health Import
@@ -88,10 +71,8 @@
       reader.onload = (event) => {
         try {
           const jsonData = JSON.parse(event.target.result);
-          if (typeof mapAppleHealthData === "function") {
-            mapAppleHealthData(jsonData);
-            alert("Apple Health data imported!");
-          }
+          mapAppleHealthData(jsonData); // process imported Apple Health data
+          alert("Apple Health data imported!");
         } catch(err) {
           alert("Error parsing JSON: " + err.message);
         }
