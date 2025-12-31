@@ -1,15 +1,14 @@
-export const dailyLogs = {
-  "2025-12-31": {
-    bloodPressure: [
-      { systolic: 144, diastolic: 75, heartRate: 87, note: "Post strength" },
-      { systolic: 132, diastolic: 73, heartRate: 86, note: "Post treadmill 5 min" },
-      { systolic: 128, diastolic: 68, heartRate: 85, note: "Post recovery (baseline)" }
-    ],
-    glucose: [{ value: 5.4 }],
-    walk: 40,
-    treadmill: 10,
-    strength: 16,
-    calories: 12,
-    heartRate: 141
-  }
-};
+2025-12-31": {
+  bloodPressure: [
+    { systolic: 130, diastolic: 69, heartRate: 80 },
+    { systolic: 121, diastolic: 67, heartRate: 80 }
+  ],
+  glucose: [{ value: 5.4 }],
+  walk: 0,
+  treadmill: 0,
+  strength: 0,
+  calories: 0,
+  heartRate: 0 // will update later if needed
+}
+// Add the after-strength BP to today's entry
+dailyLogs["2025-12-31"].bloodPressure.push({ systolic: 144, diastolic: 75, heartRate: 87 });
