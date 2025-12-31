@@ -4,7 +4,7 @@
 import { dailyLogs } from './data/dailyLogs.js';
 
 // =======================
-// Baseline
+// Baseline Date
 // =======================
 const baselineDate = "2024-10-29";
 
@@ -153,14 +153,12 @@ let bpChart=null;
 function renderBPTrends(endDate, days=7){
   const lastDays = getLastNDates(endDate,days);
   const datasets=[];
-
   lastDays.forEach(date=>{
     const day=dailyLogs[date] || { bloodPressure: [] };
     day.bloodPressure.forEach((bp,i)=>{
       if(!datasets[i]) datasets[i]={ label:`BP Reading ${i+1}`, data:[], borderColor:i%2===0?'red':'blue', backgroundColor:'rgba(0,0,0,0)', pointBackgroundColor:[] };
       datasets[i].data.push({x:date,y:bp.systolic});
-      const cat=getBPCategory(bp.systolic,bp.diastolic);
-      datasets[i].pointBackgroundColor.push(getBPColor(cat));
+      datasets[i].pointBackgroundColor.push(getBPColor(getBPCategory(bp.systolic,bp.diastolic)));
     });
     for(let j=day.bloodPressure.length;j<datasets.length;j++){
       datasets[j].data.push({x:date,y:null});
@@ -224,14 +222,19 @@ exportContainer.appendChild(exportCSVBtn);
 function exportSelectedCSV(date){
   const day = dailyLogs[date];
   const rows = [];
+
   rows.push(['Type','Systolic','Diastolic','Heart Rate','Note','Glucose','Time','Walk','Treadmill','Strength','Calories','Avg HR']);
+
   day.bloodPressure.forEach(bp=>{
     rows.push(['BP', bp.systolic, bp.diastolic, bp.heartRate, bp.note||'', '', '', '', '', '', '', '']);
   });
+
   day.glucose.forEach(g=>{
     rows.push(['Glucose', '', '', '', '', g.value, g.time||'', '', '', '', '', '']);
   });
+
   rows.push(['Activity','','','','','', '', day.walk, day.treadmill, day.strength, day.calories, day.heartRate]);
+
   const csvContent = rows.map(r=>r.map(cell=>`"${cell}"`).join(',')).join('\n');
   const blob = new Blob([csvContent], {type: "text/csv"});
   const link = document.createElement("a");
