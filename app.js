@@ -86,3 +86,58 @@ datePicker.addEventListener('change', (e) => {
     historyList.prepend(btn); // newest on top
   }
 });
+// Helper: get last 7 days from a given date
+function getLast7Days(date) {
+  const result = [];
+  const current = new Date(date);
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(current);
+    d.setDate(current.getDate() - i);
+    result.push(d.toISOString().split('T')[0]);
+  }
+  return result;
+}
+
+// Render 7-day rolling summary
+function render7DaySummary(endDate) {
+  const dailySummaryOutput = document.getElementById('dailySummaryOutput');
+  const last7 = getLast7Days(endDate);
+  
+  let html = `<h3>7-Day Rolling Summary ending ${endDate}</h3><table border="1" style="border-collapse:collapse;width:100%;text-align:center;">
+    <tr>
+      <th>Date</th><th>Walk</th><th>Treadmill</th><th>Strength</th><th>Calories</th><th>HR</th><th>BP</th>
+    </tr>`;
+  
+  last7.forEach(date => {
+    const summary = dailyLogs[date] || {
+      walk: 0, treadmill: 0, strength: 0, calories: 0, heartRate: 0,
+      bloodPressure: { systolic: 0, diastolic: 0, iHB: 0 }
+    };
+
+    const walkColor = getColor(summary.walk, referenceDay.walk);
+    const treadmillColor = getColor(summary.treadmill, referenceDay.treadmill);
+    const strengthColor = getColor(summary.strength, referenceDay.strength);
+    const caloriesColor = getColor(summary.calories, referenceDay.calories);
+    const hrColor = getColor(summary.heartRate, referenceDay.heartRate, true);
+    const bpColor = getBPColor(summary.bloodPressure.systolic, summary.bloodPressure.diastolic);
+
+    html += `<tr>
+      <td>${date}</td>
+      <td style="color:${walkColor}">${summary.walk}</td>
+      <td style="color:${treadmillColor}">${summary.treadmill}</td>
+      <td style="color:${strengthColor}">${summary.strength}</td>
+      <td style="color:${caloriesColor}">${summary.calories}</td>
+      <td style="color:${hrColor}">${summary.heartRate}</td>
+      <td style="color:${bpColor}">${summary.bloodPressure.systolic}/${summary.bloodPressure.diastolic}/${summary.bloodPressure.iHB}</td>
+    </tr>`;
+  });
+
+  html += `</table>`;
+  dailySummaryOutput.innerHTML = html;
+}
+
+// Optional: call 7-day summary when date is selected
+datePicker.addEventListener('change', (e) => {
+  const selectedDate = e.target.value;
+  render7DaySummary(selectedDate);
+});
