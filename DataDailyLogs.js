@@ -502,3 +502,54 @@ export const dailyLogs = {
   calories: 0,
   heartRate: 0
 }
+"2025-01-16": {
+  bloodPressure: [],
+  glucose: [{ value: 5.6 }],
+  walk: 0,
+  treadmill: 0,
+  strength: 0,
+  calories: 0,
+  heartRate: 0
+},
+"2025-01-17": {
+  bloodPressure: [
+    { systolic: 108, diastolic: 58, heartRate: 73 },
+    { systolic: 110, diastolic: 55, heartRate: 71 }
+  ],
+  glucose: [],
+  walk: 0,
+  treadmill: 0,
+  strength: 0,
+  calories: 0,
+  heartRate: 0
+},
+"2025-01-18": {
+  bloodPressure: [],
+  glucose: [{ value: 6 }],
+  walk: 0,
+  treadmill: 0,
+  strength: 0,
+  calories: 0,
+  heartRate: 0
+},
+"2025-01-19": {
+  bloodPressure: [{ systolic: 106, diastolic: 56, heartRate: 74 }],
+  glucose: [],
+  walk: 0,
+  treadmill: 0,
+  strength: 0,
+  calories: 0,
+  heartRate: 0
+},
+"2025-01-20": {
+  bloodPressure: [
+    { systolic: 112, diastolic: 60, heartRate: 71 },
+    { systolic: 104, diastolic: 57, heartRate: 71 }
+  ],
+  glucose: [{ value: 6 }],
+  walk: 0,
+  treadmill: 0,
+  strength: 0,
+  calories: 0,
+  heartRate: 0
+}
