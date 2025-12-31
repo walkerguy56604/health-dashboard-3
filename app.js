@@ -1,65 +1,20 @@
-// -----------------------
-// Daily logs data
-// -----------------------
-const dailyLogs = {
-  "2025-12-30": {
-    walk: 5,       // minutes
-    treadmill: 10, // minutes
-    strength: 6,   // reps
-    calories: 131, // total calories
-    heartRate: 115 // average
-  },
-  "2025-10-29": { // reference day
-    walk: 0,
-    treadmill: 0,
-    strength: 0,
-    calories: 0,
-    heartRate: 'N/A'
+async function loadHealthData() {
+  try {
+    const res = await fetch('/.netlify/functions/netlify-functions-health');
+    const data = await res.json();
+
+    const dailySummaryOutput = document.getElementById('dailySummaryOutput');
+    dailySummaryOutput.innerHTML = `
+      <h3>Daily Summary for ${data.date}</h3>
+      <div>Walk Duration: ${data.walk.minutes} min (${data.walk.distance_km} km)</div>
+      <div>Treadmill Duration: ${data.treadmill.minutes} min @ ${data.treadmill.speed}</div>
+      <div>Strength: ${data.strength.exercises.join(', ')}</div>
+      <div>BP: ${data.blood_pressure.systolic}/${data.blood_pressure.diastolic} (${data.blood_pressure.label})</div>
+    `;
+  } catch (err) {
+    console.error('Failed to load health data:', err);
   }
-};
-
-// -----------------------
-// Function to render daily summary
-// -----------------------
-function renderDailySummary(date) {
-  const dailySummaryOutput = document.getElementById('dailySummaryOutput');
-  const summary = dailyLogs[date] || {
-    walk: 0, treadmill: 0, strength: 0, calories: 0, heartRate: 'N/A'
-  };
-
-  dailySummaryOutput.innerHTML = `
-    <h3>Daily Summary for ${date}</h3>
-    <div>Walk Duration: ${summary.walk} min</div>
-    <div>Treadmill Duration: ${summary.treadmill} min</div>
-    <div>Strength Duration: ${summary.strength} reps</div>
-    <div>Calories Burned: ${summary.calories}</div>
-    <div>Average Heart Rate: ${summary.heartRate}</div>
-  `;
 }
 
-// -----------------------
-// History list & date picker logic
-// -----------------------
-const historyList = document.getElementById('historyList');
-const datePicker = document.getElementById('datePicker');
-
-datePicker.addEventListener('change', (e) => {
-  const selectedDate = e.target.value;
-  renderDailySummary(selectedDate);
-
-  // Add to history buttons if not already there
-  if (![...historyList.children].some(btn => btn.dataset.date === selectedDate)) {
-    const btn = document.createElement('button');
-    btn.textContent = selectedDate;
-    btn.dataset.date = selectedDate;
-    btn.addEventListener('click', () => renderDailySummary(selectedDate));
-    historyList.prepend(btn); // newest on top
-  }
-});
-
-// Optional: auto-render today's summary if present
-const today = new Date().toISOString().split('T')[0];
-if (dailyLogs[today]) {
-  datePicker.value = today;
-  renderDailySummary(today);
-}
+// Call the function
+loadHealthData();
