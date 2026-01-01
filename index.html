@@ -42,18 +42,65 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module">
 
-    // ===== Daily Logs =====
+    // ===== Example Daily Logs: Dec 2025 – Jan 2026 =====
     const dailyLogs = {
+      // December 2025
+      "2025-12-29": {
+        bloodPressure: [{systolic: 128, diastolic: 70, heartRate: 85, note:"After walk"}],
+        glucose: [6.1],
+        walk: 40,
+        treadmill: 15,
+        strength: 8,
+        calories: 12,
+        heartRate: 85
+      },
+      "2025-12-30": {
+        bloodPressure: [{systolic: 130, diastolic: 72, heartRate: 87, note:"After treadmill"}],
+        glucose: [6.2],
+        walk: 30,
+        treadmill: 10,
+        strength: 10,
+        calories: 10,
+        heartRate: 87
+      },
+      "2025-12-31": {
+        bloodPressure: [{systolic: 125, diastolic: 68, heartRate: 83}],
+        glucose: [6.0],
+        walk: 35,
+        treadmill: 20,
+        strength: 12,
+        calories: 15,
+        heartRate: 83
+      },
+      // January 2026
       "2026-01-01": {
-        bloodPressure: [{ systolic: 135, diastolic: 71, heartRate: 88, note: "5 min after strength training, high hypertension" }],
+        bloodPressure: [{systolic: 135, diastolic: 71, heartRate: 88, note: "5 min after strength training"}],
         glucose: [6.4],
         walk: 45,
         treadmill: 10,
         strength: 10,
         calories: 11,
         heartRate: 88
+      },
+      "2026-01-02": {
+        bloodPressure: [{systolic: 127, diastolic: 69, heartRate: 84}],
+        glucose: [6.3],
+        walk: 50,
+        treadmill: 15,
+        strength: 9,
+        calories: 12,
+        heartRate: 84
+      },
+      "2026-01-03": {
+        bloodPressure: [{systolic: 129, diastolic: 70, heartRate: 86}],
+        glucose: [6.2],
+        walk: 40,
+        treadmill: 12,
+        strength: 11,
+        calories: 13,
+        heartRate: 86
       }
-      // Add more dates here
+      // You can continue adding more months here
     };
 
     // ===== Helpers =====
@@ -61,15 +108,15 @@
     const getBPColor = cat => cat==="H"?"red":cat==="M"?"orange":"green";
 
     const getLastNDates = (endDate,n) => {
-      const allDates=Object.keys(dailyLogs).sort();
-      const idx=allDates.indexOf(endDate);
-      if(idx===-1) return [];
+      const allDates = Object.keys(dailyLogs).sort();
+      const idx = allDates.indexOf(endDate);
+      if(idx === -1) return [];
       return allDates.slice(Math.max(0, idx-n+1), idx+1);
     };
 
     const get7DayRolling = (date) => {
-      const windowDates=getLastNDates(date,7);
-      let sums={ sys:0, dia:0, bpCount:0, glucose:0, glucoseCount:0, walk:0, treadmill:0, strength:0, calories:0, heartRate:0, hrCount:0 };
+      const windowDates = getLastNDates(date,7);
+      let sums = { sys:0, dia:0, bpCount:0, glucose:0, glucoseCount:0, walk:0, treadmill:0, strength:0, calories:0, heartRate:0, hrCount:0 };
       windowDates.forEach(d=>{
         const day=dailyLogs[d];
         day.bloodPressure.forEach(bp=>{ sums.sys+=bp.systolic; sums.dia+=bp.diastolic; sums.bpCount++; });
@@ -88,8 +135,8 @@
 
     // ===== Render Daily Summary =====
     const renderDailySummary = (date) => {
-      const out=document.getElementById("dailySummaryOutput");
-      const d=dailyLogs[date];
+      const out = document.getElementById("dailySummaryOutput");
+      const d = dailyLogs[date];
       if(!d){ out.innerHTML=`<div>No data for ${date}</div>`; return; }
 
       let html=`<h3>${date}</h3><h4>Blood Pressure</h4>`;
@@ -126,10 +173,10 @@
 
     // ===== Initialize Dashboard =====
     const today = Object.keys(dailyLogs).sort().pop();
-    const picker=document.getElementById("datePicker");
-    const history=document.getElementById("historyList");
+    const picker = document.getElementById("datePicker");
+    const history = document.getElementById("historyList");
 
-    picker.value=today;
+    picker.value = today;
     renderDailySummary(today);
 
     Object.keys(dailyLogs).forEach(date=>{
