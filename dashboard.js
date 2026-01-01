@@ -1,3 +1,4 @@
+console.log("Daily logs loaded:", dailyLogs);
 import { dailyLogs } from "./data/dailyLogs.js";
 
 const today = "2025-12-31";
