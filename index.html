@@ -1,29 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Health Dashboard</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <title>Health Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f7f8fa; color: #0f172a; padding: 20px; }
+    h1 { text-align: center; }
+    label, input, button { display: block; margin-bottom: 10px; font-size: 16px; }
+    #dailySummaryOutput {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    #historyList { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 5px; }
+    #historyList button { padding: 5px 10px; font-size: 14px; cursor: pointer; }
+    #trendContainer { margin-top: 30px; padding: 15px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    canvas { width: 100%; height: 250px; }
+    #exportContainer { margin-top: 15px; display:flex; gap:10px; flex-wrap:wrap; }
+  </style>
 </head>
 <body>
-<h1>Health Dashboard</h1>
+  <h1>Health Dashboard</h1>
 
-<label for="datePicker">Select Date:</label>
-<input type="date" id="datePicker">
+  <label for="datePicker">Select Date:</label>
+  <input type="date" id="datePicker">
 
-<div id="dailySummaryOutput"></div>
+  <div id="dailySummaryOutput"></div>
 
-<h2>History</h2>
-<div id="historyList"></div>
+  <h2>History</h2>
+  <div id="historyList"></div>
 
-<div id="trendContainer">
-  <h2>Blood Pressure Trends</h2>
-  <canvas id="trendChart"></canvas>
-</div>
+  <div id="trendContainer">
+    <h2>Blood Pressure Trends</h2>
+    <canvas id="trendChart"></canvas>
+  </div>
 
-<div id="exportContainer"></div>
+  <div id="exportContainer"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="module" src="sandbox.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module">
+
+    // ===== Daily Logs =====
+    const dailyLogs = {
+      "2026-01-01": {
+        bloodPressure: [{ systolic: 135, diastolic: 71, heartRate: 88, note: "5 min after strength training, high hypertension" }],
+        glucose: [6.4],
+        walk: 45,
+        treadmill: 10,
+        strength: 10,
+        calories: 11,
+        heartRate: 88
+      }
+      // Add more dates here
+    };
+
+    // ===== Helpers =====
+    const getBPCategory = (s,d) => s>=140||d>=90?"H":s>=120||d>=80?"M":"L";
+    const getBPColor = cat => cat==="H"?"red":cat==="M"?"orange":"green";
+
+    const getLastNDates = (endDate,n) => {
+      const allDates=Object.keys(dailyLogs).sort();
+      const idx=allDates.indexOf(endDate);
+      if(idx===-1) return [];
+      return allDates.slice(Math.max(0, idx-n+1), idx+1);
+    };
+
+    const get7DayRolling = (date) => {
+      const windowDates=getLastNDates(date,7);
+      let sums={ sys:0, dia:0, bpCount:0, glucose:0, glucoseCount:0, walk:0, treadmill:0, strength:0, calories:0, heartRate:0, hrCount:0 };
+      windowDates.forEach(d=>{
+        const day=dailyLogs[d];
+        day.bloodPressure.forEach(bp=>{ sums.sys+=bp.systolic; sums.dia+=bp.diastolic; sums.bpCount++; });
+        day.glucose.forEach(g=>{ sums.glucose+=g??0; sums.glucoseCount++; });
+        sums.walk+=day.walk??0; sums.treadmill+=day.treadmill??0; sums.strength+=day.strength??0; sums.calories+=day.calories??0;
+        if(day.heartRate){ sums.heartRate+=day.heartRate; sums.hrCount++; }
+      });
+      return {
+        bpSys: sums.bpCount ? (sums.sys/sums.bpCount).toFixed(1) : "—",
+        bpDia: sums.bpCount ? (sums.dia/sums.bpCount).toFixed(1) : "—",
+        glucose: sums.glucoseCount ? (sums.glucose/sums.glucoseCount).toFixed(1) : "—",
+        walk: sums.walk, treadmill: sums.treadmill, strength: sums.strength, calories: sums.calories,
+        heartRate: sums.hrCount ? (sums.heartRate/sums.hrCount).toFixed(0) : "—"
+      };
+    };
+
+    // ===== Render Daily Summary =====
+    const renderDailySummary = (date) => {
+      const out=document.getElementById("dailySummaryOutput");
+      const d=dailyLogs[date];
+      if(!d){ out.innerHTML=`<div>No data for ${date}</div>`; return; }
+
+      let html=`<h3>${date}</h3><h4>Blood Pressure</h4>`;
+      if(d.bloodPressure.length){
+        d.bloodPressure.forEach((bp,i)=>{
+          const cat=getBPCategory(bp.systolic,bp.diastolic);
+          html+=`<div style="color:${getBPColor(cat)}">BP #${i+1}: ${bp.systolic}/${bp.diastolic} HR:${bp.heartRate} (${cat})</div>`;
+        });
+      } else html+="<div>No BP recorded</div>";
+
+      html+=`<h4>Glucose</h4>`;
+      if(d.glucose.length){ d.glucose.forEach(g=> html+=`<div>${g} mmol/L</div>`); }
+      else html+="<div>No glucose</div>";
+
+      html+=`<h4>Activity</h4>
+        <div>Walk: ${d.walk} min</div>
+        <div>Treadmill: ${d.treadmill} min</div>
+        <div>Strength: ${d.strength} reps</div>
+        <div>Calories: ${d.calories}</div>
+        <div>Avg HR: ${d.heartRate}</div>`;
+
+      const r=get7DayRolling(date);
+      html+=`<h4>7-Day Rolling Averages</h4>
+        <div>BP: ${r.bpSys}/${r.bpDia}</div>
+        <div>Glucose: ${r.glucose}</div>
+        <div>Walk: ${r.walk} min</div>
+        <div>Treadmill: ${r.treadmill} min</div>
+        <div>Strength: ${r.strength} reps</div>
+        <div>Calories: ${r.calories}</div>
+        <div>Avg HR: ${r.heartRate}</div>`;
+
+      out.innerHTML=html;
+    };
+
+    // ===== Initialize Dashboard =====
+    const today = Object.keys(dailyLogs).sort().pop();
+    const picker=document.getElementById("datePicker");
+    const history=document.getElementById("historyList");
+
+    picker.value=today;
+    renderDailySummary(today);
+
+    Object.keys(dailyLogs).forEach(date=>{
+      const btn=document.createElement('button');
+      btn.textContent=date; btn.dataset.date=date;
+      btn.onclick=()=>renderDailySummary(date);
+      history.prepend(btn);
+    });
+
+    picker.addEventListener("change", e=>{
+      renderDailySummary(e.target.value);
+    });
+
+  </script>
 </body>
 </html>
