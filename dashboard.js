@@ -1,7 +1,7 @@
 // =======================
 // Dashboard Controller
 // =======================
-import { renderDailySummary } from './main.js';
+import { renderDailySummary, get7DayRolling } from './main.js';
 import { dailyLogs } from './data/dailyLogs.js';
 
 // ====== Elements ======
@@ -23,23 +23,34 @@ renderDailySummary(datePicker.value);
 datePicker.addEventListener("change", (e) => {
   const selectedDate = e.target.value;
   renderDailySummary(selectedDate);
+  updateTrendChart(selectedDate);
 });
 
 // ====== Render History Buttons ======
-historyList.innerHTML = ""; // clear any old content
+historyList.innerHTML = ""; // clear old content
 allDates.slice().reverse().forEach(date => {
   const btn = document.createElement("button");
   btn.textContent = date;
   btn.addEventListener("click", () => {
     datePicker.value = date;
     renderDailySummary(date);
+    updateTrendChart(date);
   });
   historyList.appendChild(btn);
 });
 
-// ====== Optional: Trend Chart Setup ======
+// ====== Helper: Extract 7-Day Rolling Data for Chart ======
+function getRollingDataset(metric) {
+  return allDates.map(date => {
+    const r = get7DayRolling(date);
+    return r[metric] !== "—" ? Number(r[metric]) : null;
+  });
+}
+
+// ====== Trend Chart ======
 let trendChart = null;
-if (trendCanvas) {
+function initTrendChart() {
+  if (!trendCanvas) return;
   const ctx = trendCanvas.getContext("2d");
   trendChart = new Chart(ctx, {
     type: "line",
@@ -47,22 +58,25 @@ if (trendCanvas) {
       labels: allDates,
       datasets: [
         {
-          label: "Systolic BP",
-          data: allDates.map(d => dailyLogs[d].bloodPressure.length ? dailyLogs[d].bloodPressure[0].systolic : null),
+          label: "BP Systolic (7-day avg)",
+          data: getRollingDataset("bpSys"),
           borderColor: "red",
-          fill: false
+          fill: false,
+          tension: 0.3
         },
         {
-          label: "Diastolic BP",
-          data: allDates.map(d => dailyLogs[d].bloodPressure.length ? dailyLogs[d].bloodPressure[0].diastolic : null),
+          label: "BP Diastolic (7-day avg)",
+          data: getRollingDataset("bpDia"),
           borderColor: "orange",
-          fill: false
+          fill: false,
+          tension: 0.3
         },
         {
-          label: "Glucose",
-          data: allDates.map(d => dailyLogs[d].glucose.length ? (dailyLogs[d].glucose[0].value ?? dailyLogs[d].glucose[0]) : null),
+          label: "Glucose (7-day avg)",
+          data: getRollingDataset("glucose"),
           borderColor: "blue",
-          fill: false
+          fill: false,
+          tension: 0.3
         }
       ]
     },
@@ -70,7 +84,7 @@ if (trendCanvas) {
       responsive: true,
       plugins: {
         legend: { position: 'top' },
-        title: { display: true, text: 'Health Trends (placeholder)' }
+        title: { display: true, text: '7-Day Rolling Health Trends' }
       },
       scales: {
         y: { beginAtZero: false }
@@ -78,6 +92,30 @@ if (trendCanvas) {
     }
   });
 }
+initTrendChart();
+
+// ====== Update Trend Chart Highlighting Today ======
+function updateTrendChart(selectedDate) {
+  if (!trendChart) return;
+
+  trendChart.data.datasets.forEach(ds => {
+    // Reset point background colors
+    ds.pointBackgroundColor = ds.data.map(() => "transparent");
+  });
+
+  const todayIdx = allDates.indexOf(selectedDate);
+  if (todayIdx !== -1) {
+    trendChart.data.datasets.forEach(ds => {
+      ds.pointBackgroundColor[todayIdx] = "limegreen"; // highlight today's point
+      ds.pointRadius = 6;
+    });
+  }
+
+  trendChart.update();
+}
+
+// Initialize with today highlighted
+updateTrendChart(datePicker.value);
 
 // ====== Optional: Future Updates ======
-// You can dynamically update trendChart.data and call trendChart.update() whenever needed
+// You can add more metrics or interactions here
