@@ -58,4 +58,4 @@ export const dailyLogs = {
       "Morning 5-minute walk, 08:35–08:40, non-Siri"
     ]
   }
-};
+}; 
