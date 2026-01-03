@@ -42,14 +42,15 @@ export const dailyLogs = {
     walk: 0,
     glucose: [],
     calories: 22,
-    heartRate: 92
+    heartRate: 92,
+    notes: []
   },
 
   "2026-01-03": {
     bloodPressure: [],
     glucose: [],
     walk: 5, // 5-minute morning walk
-    treadmill: 0,
+    treadmill: [], // standardized as array
     strength: 0,
     strengthDetails: [],
     calories: 0,
@@ -58,4 +59,4 @@ export const dailyLogs = {
       "Morning 5-minute walk, 08:35–08:40, non-Siri"
     ]
   }
-}; 
+};
