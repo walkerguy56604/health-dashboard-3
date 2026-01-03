@@ -1,74 +1,83 @@
-// ===== IMPORTS (MUST BE AT TOP) =====
-import { dailyLogs } from "./data/dailyLogs.js";
+// =======================
+// Dashboard Controller
+// =======================
+import { renderDailySummary } from './main.js';
+import { dailyLogs } from './data/dailyLogs.js';
 
-// ===== DEBUG (SAFE TO KEEP FOR NOW) =====
-console.log("Dashboard loaded");
-console.log("Daily logs:", dailyLogs);
+// ====== Elements ======
+const datePicker = document.getElementById("datePicker");
+const historyList = document.getElementById("historyList");
+const trendCanvas = document.getElementById("trendChart");
 
-// ===== UTILITIES =====
-function getBPCategory(s, d) {
-  if (s >= 140 || d >= 90) return "High";
-  if (s >= 120 || d >= 80) return "Medium";
-  return "Low";
-}
+// ====== Initialize Date Picker ======
+const allDates = Object.keys(dailyLogs).sort();
+const today = new Date().toISOString().split('T')[0];
 
-// ===== RENDER DAILY SUMMARY =====
-export function renderDailySummary(date) {
-  const output = document.getElementById("dailySummaryOutput");
-  const day = dailyLogs[date];
+// Set date picker to today (or latest available date)
+datePicker.value = allDates.includes(today) ? today : allDates[allDates.length - 1];
 
-  if (!day) {
-    output.innerHTML = `<div>No data for ${date}</div>`;
-    return;
-  }
+// Render initial summary
+renderDailySummary(datePicker.value);
 
-  let html = `<h3>${date}</h3>`;
-
-  // ---- Blood Pressure ----
-  html += `<h4>Blood Pressure</h4>`;
-  if (day.bloodPressure && day.bloodPressure.length) {
-    day.bloodPressure.forEach((bp, i) => {
-      const cat = getBPCategory(bp.systolic, bp.diastolic);
-      html += `
-        <div>
-          BP #${i + 1}: ${bp.systolic}/${bp.diastolic}
-          HR: ${bp.heartRate ?? "—"}
-          (${cat})
-        </div>`;
-    });
-  } else {
-    html += `<div>No BP recorded</div>`;
-  }
-
-  // ---- Glucose ----
-  html += `<h4>Glucose</h4>`;
-  if (day.glucose && day.glucose.length) {
-    day.glucose.forEach(g => {
-      html += `<div>${g.value ?? g} mmol/L</div>`;
-    });
-  } else {
-    html += `<div>No glucose recorded</div>`;
-  }
-
-  // ---- Activity ----
-  html += `<h4>Activity</h4>
-    <div>Walk: ${day.walk ?? 0} min</div>
-    <div>Treadmill: ${day.treadmill ?? 0} min</div>
-    <div>Strength: ${day.strength ?? 0}</div>
-    <div>Calories: ${day.calories ?? 0}</div>
-    <div>Avg HR: ${day.heartRate ?? "—"}</div>
-  `;
-
-  output.innerHTML = html;
-}
-
-// ===== INIT =====
-const picker = document.getElementById("datePicker");
-const today = Object.keys(dailyLogs).sort().at(-1);
-
-picker.value = today;
-renderDailySummary(today);
-
-picker.addEventListener("change", e => {
-  renderDailySummary(e.target.value);
+// ====== Handle Date Picker Change ======
+datePicker.addEventListener("change", (e) => {
+  const selectedDate = e.target.value;
+  renderDailySummary(selectedDate);
 });
+
+// ====== Render History Buttons ======
+historyList.innerHTML = ""; // clear any old content
+allDates.slice().reverse().forEach(date => {
+  const btn = document.createElement("button");
+  btn.textContent = date;
+  btn.addEventListener("click", () => {
+    datePicker.value = date;
+    renderDailySummary(date);
+  });
+  historyList.appendChild(btn);
+});
+
+// ====== Optional: Trend Chart Setup ======
+let trendChart = null;
+if (trendCanvas) {
+  const ctx = trendCanvas.getContext("2d");
+  trendChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: allDates,
+      datasets: [
+        {
+          label: "Systolic BP",
+          data: allDates.map(d => dailyLogs[d].bloodPressure.length ? dailyLogs[d].bloodPressure[0].systolic : null),
+          borderColor: "red",
+          fill: false
+        },
+        {
+          label: "Diastolic BP",
+          data: allDates.map(d => dailyLogs[d].bloodPressure.length ? dailyLogs[d].bloodPressure[0].diastolic : null),
+          borderColor: "orange",
+          fill: false
+        },
+        {
+          label: "Glucose",
+          data: allDates.map(d => dailyLogs[d].glucose.length ? (dailyLogs[d].glucose[0].value ?? dailyLogs[d].glucose[0]) : null),
+          borderColor: "blue",
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        title: { display: true, text: 'Health Trends (placeholder)' }
+      },
+      scales: {
+        y: { beginAtZero: false }
+      }
+    }
+  });
+}
+
+// ====== Optional: Future Updates ======
+// You can dynamically update trendChart.data and call trendChart.update() whenever needed
