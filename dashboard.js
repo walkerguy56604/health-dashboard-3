@@ -1,29 +1,37 @@
-import { dailyLogs } from './dailylogs.js'; // Make sure path is correct
-import { renderDailySummary } from './main.js'; // Use the new main.js function
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Dashboard</title>
+<style>
+  body { font-family: sans-serif; margin: 20px; }
+  select { margin-right: 10px; padding: 5px; }
+  .category { font-weight: bold; margin-top: 15px; }
+  p { margin: 4px 0; }
+</style>
+</head>
+<body>
 
-// ====== Elements ======
-const datePicker = document.getElementById("datePicker");
-const bpFilter = document.getElementById("bpFilter"); // optional filter dropdown
+<h1>Health Dashboard</h1>
 
-// ====== Populate Date Picker ======
-Object.keys(dailyLogs).sort().forEach(date => {
-    const option = document.createElement("option");
-    option.value = date;
-    option.text = date;
-    datePicker.appendChild(option);
-});
+<!-- Controls -->
+<label for="datePicker">Select Date:</label>
+<select id="datePicker"></select>
 
-// ====== Refresh Summary ======
-function refreshSummary() {
-    renderDailySummary(datePicker.value, bpFilter ? bpFilter.value : "all");
-}
+<label for="bpFilter">BP Filter:</label>
+<select id="bpFilter">
+  <option value="all">All</option>
+  <option value="L">Low</option>
+  <option value="M">Medium</option>
+  <option value="H">High</option>
+</select>
 
-// ====== Event Listeners ======
-datePicker.addEventListener("change", refreshSummary);
-if (bpFilter) bpFilter.addEventListener("change", refreshSummary);
+<!-- Output -->
+<div id="dailySummaryOutput" style="margin-top:20px;"></div>
 
-// ====== Initial Render ======
-if (datePicker.options.length) {
-    datePicker.value = datePicker.options[0].value;
-    refreshSummary();
-}
+<!-- Scripts -->
+<script type="module" src="dashboard.js"></script>
+
+</body>
+</html>
