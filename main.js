@@ -3,7 +3,7 @@ import { dailyLogs } from "./dailylogs.js";
 // Rolling Calculations
 // =======================
 
-function getRolling(date, days) {
+function getRolling(date, days) }
   const dates = Object.keys(dailyLogs).sort();
   const idx = dates.indexOf(date);
   if (idx === -1) return null;
