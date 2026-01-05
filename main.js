@@ -118,3 +118,10 @@ function getRolling(date, days) {
     hr: sums.hrCount ? Math.round(sums.hr / sums.hrCount) : "—"
   };
 }
+document
+  .querySelectorAll('input[name="rollingDays"]')
+  .forEach(radio => {
+    radio.addEventListener("change", () => {
+      render(datePicker.value);
+    });
+  });
