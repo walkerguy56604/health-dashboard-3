@@ -124,3 +124,22 @@ function render(date) {
 document.getElementById("datePicker").addEventListener("change", e => {
   render(e.target.value);
 });
+// Hook Date Picker and populate options
+const datePicker = document.getElementById("datePicker");
+const output = document.getElementById("dailySummaryOutput");
+
+// Populate dropdown
+Object.keys(dailyLogs).sort().forEach(date => {
+  const opt = document.createElement("option");
+  opt.value = date;
+  opt.textContent = date;
+  datePicker.appendChild(opt);
+});
+
+// Render initially
+render(Object.keys(dailyLogs).sort()[0]);
+
+// Handle change
+datePicker.addEventListener("change", e => {
+  render(e.target.value);
+});
