@@ -5,6 +5,7 @@
     "treadmill": 20,
     "calories": 22,
     "heartRate": 92,
+    "weight": 175.4,
     "bloodPressure": [
       { "systolic": 127, "diastolic": 57, "heartRate": 91, "note": "Post AM strength" },
       { "systolic": 128, "diastolic": 72, "heartRate": 97, "note": "Post treadmill" },
@@ -20,6 +21,7 @@
     "treadmill": 0,
     "calories": 0,
     "heartRate": null,
+    "weight": 174.8,
     "bloodPressure": [],
     "notes": [
       "Morning 5-minute walk, non-Siri"
@@ -32,6 +34,7 @@
     "treadmill": 10,
     "calories": 12,
     "heartRate": 102,
+    "weight": 174.6,
     "bloodPressure": [
       { "systolic": 132, "diastolic": 80, "heartRate": 66, "note": "Post strength training" }
     ],
@@ -47,6 +50,7 @@
     "treadmill": 10,
     "calories": 160,
     "heartRate": 85,
+    "weight": 174.5,
     "bloodPressure": [
       { "systolic": 139, "diastolic": 70, "heartRate": 84, "note": "Post strength" },
       { "systolic": 131, "diastolic": 67, "heartRate": 85, "note": "Post treadmill" }
