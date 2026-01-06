@@ -2,11 +2,10 @@
 // Config
 // =======================
 
-// If you're testing locally, keep the relative path:
+// RAW GitHub JSON or local file path
+// If using local: "./dailylogs.json"
+// If using GitHub raw URL: "https://raw.githubusercontent.com/yourusername/yourrepo/main/dailylogs.json"
 const DATA_URL = "./dailylogs.json";
-
-// If hosted remotely (GitHub raw), it could be like:
-// const DATA_URL = "https://raw.githubusercontent.com/yourusername/yourrepo/main/dailylogs.json";
 
 let dailyLogs = {};
 
@@ -16,14 +15,14 @@ let dailyLogs = {};
 async function loadData() {
   try {
     const res = await fetch(DATA_URL);
-    if (!res.ok) throw new Error(`Failed to load JSON: ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
     dailyLogs = await res.json();
 
     populateDatePicker();
   } catch (err) {
-    console.error(err);
+    console.error("Failed to load daily logs:", err);
     const out = document.getElementById("dailySummaryOutput");
-    out.innerHTML = "<p style='color:red'>Error loading data</p>";
+    out.innerHTML = "<p style='color:red;'>Failed to load data. Check console for details.</p>";
   }
 }
 
@@ -43,9 +42,10 @@ function populateDatePicker() {
     picker.appendChild(opt);
   });
 
+  // Show the most recent date by default
   if (dates.length > 0) {
     picker.value = dates[dates.length - 1];
-    render(picker.value);
+    render(dates[dates.length - 1]);
   }
 }
 
@@ -57,7 +57,7 @@ function render(date) {
   const d = dailyLogs[date];
 
   if (!d) {
-    out.innerHTML = "<p>No data for this date</p>";
+    out.innerHTML = "<p>No data available for this date.</p>";
     return;
   }
 
@@ -72,7 +72,7 @@ function render(date) {
 
     <h4>Blood Pressure</h4>
     ${
-      d.bloodPressure.length
+      d.bloodPressure && d.bloodPressure.length
         ? d.bloodPressure
             .map(bp => `${bp.systolic}/${bp.diastolic} (HR ${bp.heartRate}) – ${bp.note}`)
             .join("<br>")
@@ -81,7 +81,7 @@ function render(date) {
 
     <h4>Notes</h4>
     ${
-      d.notes.length
+      d.notes && d.notes.length
         ? d.notes.map(n => `• ${n}`).join("<br>")
         : "No notes"
     }
@@ -91,8 +91,7 @@ function render(date) {
 // =======================
 // Event Listener
 // =======================
-document.getElementById("datePicker")
-  .addEventListener("change", e => render(e.target.value));
+document.getElementById("datePicker").addEventListener("change", e => render(e.target.value));
 
 // =======================
 // Initialize
