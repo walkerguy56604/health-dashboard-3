@@ -1,28 +1,66 @@
 // =======================
-// Config
+// Daily Logs (Embedded)
 // =======================
-
-// ⬇️ REPLACE THIS with your RAW GitHub JSON URL
-const DATA_URL = "./dailyLogs.json"; 
-// (use full https://raw.githubusercontent.com/... later if hosted remotely)
-
-let dailyLogs = {};
-
-// =======================
-// Load JSON
-// =======================
-
-async function loadData() {
-  const res = await fetch(DATA_URL);
-  dailyLogs = await res.json();
-
-  populateDatePicker();
-}
+const dailyLogs = {
+  "2026-01-02": {
+    "walk": 0,
+    "strength": 29,
+    "treadmill": 20,
+    "calories": 22,
+    "heartRate": 92,
+    "bloodPressure": [
+      { "systolic": 127, "diastolic": 57, "heartRate": 91, "note": "Post AM strength" },
+      { "systolic": 128, "diastolic": 72, "heartRate": 97, "note": "Post treadmill" },
+      { "systolic": 136, "diastolic": 67, "heartRate": 93, "note": "Post PM strength" },
+      { "systolic": 116, "diastolic": 64, "heartRate": 92, "note": "Post PM treadmill" }
+    ],
+    "notes": []
+  },
+  "2026-01-03": {
+    "walk": 5,
+    "strength": 0,
+    "treadmill": 0,
+    "calories": 0,
+    "heartRate": null,
+    "bloodPressure": [],
+    "notes": [
+      "Morning 5-minute walk, non-Siri"
+    ]
+  },
+  "2026-01-04": {
+    "walk": 35,
+    "strength": 30,
+    "treadmill": 10,
+    "calories": 12,
+    "heartRate": 102,
+    "bloodPressure": [
+      { "systolic": 132, "diastolic": 80, "heartRate": 66, "note": "Post strength training" }
+    ],
+    "notes": [
+      "Morning Siri walk",
+      "Afternoon treadmill"
+    ]
+  },
+  "2026-01-05": {
+    "walk": 10,
+    "strength": 18,
+    "treadmill": 10,
+    "calories": 160,
+    "heartRate": 85,
+    "bloodPressure": [
+      { "systolic": 139, "diastolic": 70, "heartRate": 84, "note": "Post strength" },
+      { "systolic": 131, "diastolic": 67, "heartRate": 85, "note": "Post treadmill" }
+    ],
+    "notes": [
+      "Morning Siri walk",
+      "Morning non-Siri walk"
+    ]
+  }
+};
 
 // =======================
 // Populate Date Picker
 // =======================
-
 function populateDatePicker() {
   const picker = document.getElementById("datePicker");
   picker.innerHTML = "";
@@ -43,9 +81,8 @@ function populateDatePicker() {
 }
 
 // =======================
-// Render
+// Render Dashboard
 // =======================
-
 function render(date) {
   const out = document.getElementById("dailySummaryOutput");
   const d = dailyLogs[date];
@@ -68,7 +105,7 @@ function render(date) {
     ${
       d.bloodPressure.length
         ? d.bloodPressure
-            .map(bp => `${bp.systolic}/${bp.diastolic} (HR ${bp.heartRate})`)
+            .map(bp => `${bp.systolic}/${bp.diastolic} (HR ${bp.heartRate}) – ${bp.note}`)
             .join("<br>")
         : "No BP readings"
     }
@@ -83,15 +120,13 @@ function render(date) {
 }
 
 // =======================
-// Events
+// Event Listeners
 // =======================
-
 document
   .getElementById("datePicker")
   .addEventListener("change", e => render(e.target.value));
 
 // =======================
-// Init
+// Initialize
 // =======================
-
-loadData();
+populateDatePicker();
