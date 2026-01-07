@@ -66,12 +66,24 @@ function renderSummary(date) {
     return;
   }
 
+  // Calculate average BP and HR if readings exist
+  let avgBP = "No BP readings";
+  let avgHR = "—";
+  if (d.bloodPressure.length) {
+    const totalSystolic = d.bloodPressure.reduce((sum, bp) => sum + bp.systolic, 0);
+    const totalDiastolic = d.bloodPressure.reduce((sum, bp) => sum + bp.diastolic, 0);
+    const totalHR = d.bloodPressure.reduce((sum, bp) => sum + bp.heartRate, 0);
+    const count = d.bloodPressure.length;
+    avgBP = `${(totalSystolic / count).toFixed(0)}/${(totalDiastolic / count).toFixed(0)}`;
+    avgHR = (totalHR / count).toFixed(0);
+  }
+
   out.innerHTML = `
     <h3>${date}</h3>
-    <div><b>Walk:</b> ${d.walk} min</div>
-    <div><b>Strength:</b> ${d.strength} min</div>
-    <div><b>Treadmill:</b> ${d.treadmill} min</div>
-    <div><b>Calories:</b> ${d.calories}</div>
+    <div><b>Walk:</b> ${d.walk ?? "—"} min</div>
+    <div><b>Strength:</b> ${d.strength ?? "—"} min</div>
+    <div><b>Treadmill:</b> ${d.treadmill ?? "—"} min</div>
+    <div><b>Calories:</b> ${d.calories ?? "—"}</div>
     <div><b>Heart Rate:</b> ${d.heartRate ?? "—"}</div>
     <div><b>Weight:</b> ${d.weight ?? "—"} lbs</div>
     <div><b>Glucose:</b> ${d.glucose ?? "—"} mg/dL</div>
@@ -79,18 +91,14 @@ function renderSummary(date) {
     <div><b>Mood:</b> ${d.mood ?? "—"}</div>
 
     <h4>Blood Pressure</h4>
-    ${
-      d.bloodPressure.length
+    ${d.bloodPressure.length 
         ? d.bloodPressure.map(bp => `${bp.systolic}/${bp.diastolic} (HR ${bp.heartRate}) – ${bp.note}`).join("<br>")
         : "No BP readings"
     }
+    <div><b>Avg BP:</b> ${avgBP} (HR ${avgHR})</div>
 
     <h4>Notes</h4>
-    ${
-      d.notes.length
-        ? d.notes.map(n => `• ${n}`).join("<br>")
-        : "No notes"
-    }
+    ${d.notes.length ? d.notes.map(n => `• ${n}`).join("<br>") : "No notes"}
   `;
 }
 
