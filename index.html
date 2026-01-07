@@ -1,66 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Daily Health Log</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+  <meta charset="UTF-8">
+  <title>Health Dashboard</title>
   <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont;
-      background: #f5f7fa;
-      margin: 0;
-      padding: 20px;
-    }
-
-    h1 {
-      margin-bottom: 10px;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-
-    .metric {
-      margin: 6px 0;
-      font-size: 16px;
-    }
-
-    canvas {
-      max-width: 100%;
-    }
+    body { font-family: sans-serif; margin: 20px; background: #f7f7f7; color: #222; }
+    h1 { color: #333; }
+    select { font-size: 16px; margin-bottom: 20px; }
+    .entry { margin-bottom: 15px; padding: 10px; background: #fff; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    .entry span { font-weight: bold; }
+    .notes { font-style: italic; color: #555; }
+    .bp { color: blue; }
   </style>
 </head>
-
 <body>
+  <h1>Health Dashboard</h1>
+  <label for="dateSelect">Select Date:</label>
+  <select id="dateSelect"></select>
 
-  <h1>Daily Health Log</h1>
-
-  <label>
-    Select date:
-    <select id="dateSelect"></select>
-  </label>
-
-  <div class="card">
-    <div class="metric"><strong>Calories:</strong> <span id="calories">—</span></div>
-    <div class="metric"><strong>Walk:</strong> <span id="walk">—</span></div>
-    <div class="metric"><strong>Strength:</strong> <span id="strength">—</span></div>
-    <div class="metric"><strong>Treadmill:</strong> <span id="treadmill">—</span></div>
-    <div class="metric"><strong>Blood Pressure:</strong> <span id="bp">—</span></div>
-    <div class="metric"><strong>Notes:</strong> <span id="notes">—</span></div>
-  </div>
-
-  <div class="card">
-    <canvas id="activityChart"></canvas>
-  </div>
+  <div id="dashboard"></div>
 
   <script src="main.js"></script>
 </body>
