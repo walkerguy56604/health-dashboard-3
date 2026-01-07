@@ -1,37 +1,21 @@
 // =======================
-// Config
+// main.js
 // =======================
-const DATA_URL = "./dailyLogs.json";
-let dailyLogs = {};
 
-const thresholds = {
-  bloodPressure: { systolic: 130, diastolic: 80 },
-  heartRate: { min: 60, max: 100 },
-  glucose: { min: 70, max: 140 },
-  weight: { min: 60, max: 80 },    // kg
-  sleep: { min: 6, max: 8 },       // hours
-  HRV: { min: 50, max: 100 },      // arbitrary units
-  mood: ["😞", "😐", "🙂", "😃"]
-};
-
-// =======================
-// Load JSON Data
-// =======================
-async function loadData() {
+// Load the daily logs JSON
+async function loadDailyLogs() {
   try {
-    const res = await fetch(DATA_URL);
-    dailyLogs = await res.json();
-    populateDatePicker();
+    const response = await fetch("dailyLogs.json"); // Ensure this is your JSON file
+    if (!response.ok) throw new Error("Failed to load dailyLogs.json");
+    return await response.json();
   } catch (err) {
-    console.error("Error loading daily logs:", err);
-    document.getElementById("dailySummaryOutput").innerHTML = "<p>Failed to load data</p>";
+    console.error(err);
+    return {};
   }
 }
 
-// =======================
-// Populate Date Picker
-// =======================
-function populateDatePicker() {
+// Populate the date picker
+function populateDatePicker(dailyLogs) {
   const picker = document.getElementById("datePicker");
   picker.innerHTML = "";
   const dates = Object.keys(dailyLogs).sort();
@@ -41,109 +25,64 @@ function populateDatePicker() {
     opt.textContent = date;
     picker.appendChild(opt);
   });
-  if (dates.length > 0) render(dates[dates.length - 1]);
-}
 
-// =======================
-// Trend helper
-// =======================
-function trendArrow(date, metric) {
-  const dates = Object.keys(dailyLogs).sort();
-  const idx = dates.indexOf(date);
-  if (idx <= 0) return ""; // no previous day
-  const prevValue = dailyLogs[dates[idx - 1]][metric];
-  const currValue = dailyLogs[date][metric];
-  if (currValue == null || prevValue == null) return "";
-  if (currValue > prevValue) return "↑";
-  if (currValue < prevValue) return "↓";
-  return "→";
-}
-
-// =======================
-// Color coding helper
-// =======================
-function colorValue(metric, value) {
-  if (value === null || value === undefined) return "—";
-
-  switch(metric) {
-    case "heartRate":
-      if (value < thresholds.heartRate.min) return `<span style="color:blue">${value}</span>`;
-      if (value > thresholds.heartRate.max) return `<span style="color:red">${value}</span>`;
-      return `<span style="color:green">${value}</span>`;
-    case "glucose":
-      if (value < thresholds.glucose.min) return `<span style="color:blue">${value}</span>`;
-      if (value > thresholds.glucose.max) return `<span style="color:red">${value}</span>`;
-      return `<span style="color:green">${value}</span>`;
-    case "bloodPressure":
-      const { systolic, diastolic } = value;
-      if (systolic > thresholds.bloodPressure.systolic || diastolic > thresholds.bloodPressure.diastolic)
-        return `<span style="color:red">${systolic}/${diastolic}</span>`;
-      return `<span style="color:green">${systolic}/${diastolic}</span>`;
-    case "weight":
-      if (value < thresholds.weight.min) return `<span style="color:blue">${value}</span>`;
-      if (value > thresholds.weight.max) return `<span style="color:red">${value}</span>`;
-      return `<span style="color:green">${value}</span>`;
-    case "sleep":
-      if (value < thresholds.sleep.min) return `<span style="color:red">${value}</span>`;
-      if (value > thresholds.sleep.max) return `<span style="color:blue">${value}</span>`;
-      return `<span style="color:green">${value}</span>`;
-    case "HRV":
-      if (value < thresholds.HRV.min) return `<span style="color:red">${value}</span>`;
-      if (value > thresholds.HRV.max) return `<span style="color:blue">${value}</span>`;
-      return `<span style="color:green">${value}</span>`;
-    case "mood":
-      return `<span>${value ?? "—"}</span>`;
-    default:
-      return value;
+  if (dates.length > 0) {
+    picker.value = dates[dates.length - 1];
+    renderDashboard(dailyLogs, picker.value);
   }
 }
 
-// =======================
-// Render Dashboard
-// =======================
-function render(date) {
+// Render the dashboard
+function renderDashboard(dailyLogs, date) {
   const out = document.getElementById("dailySummaryOutput");
   const d = dailyLogs[date];
+
   if (!d) {
-    out.innerHTML = "<p>No data</p>";
+    out.innerHTML = "<p>No data available for this date.</p>";
     return;
   }
 
+  // Helper function for colored values
+  const colorValue = (label, value) => {
+    if (value === null || value === undefined) return `<span>${label}: —</span>`;
+    const color = typeof value === "number" && value > 100 ? "red" : "green"; // example
+    return `<span style="color:${color}"><b>${label}:</b> ${value}</span>`;
+  };
+
   out.innerHTML = `
     <h3>${date}</h3>
-    <div><b>Walk:</b> ${d.walk ?? "—"} min ${trendArrow(date, "walk")}</div>
-    <div><b>Strength:</b> ${d.strength ?? "—"} min ${trendArrow(date, "strength")}</div>
-    <div><b>Treadmill:</b> ${d.treadmill ?? "—"} min ${trendArrow(date, "treadmill")}</div>
-    <div><b>Calories:</b> ${d.calories ?? "—"} ${trendArrow(date, "calories")}</div>
-    <div><b>Heart Rate:</b> ${colorValue("heartRate", d.heartRate)} ${trendArrow(date, "heartRate")}</div>
-    <div><b>Weight:</b> ${colorValue("weight", d.weight)} ${trendArrow(date, "weight")}</div>
-    <div><b>Glucose:</b> ${colorValue("glucose", d.glucose)} ${trendArrow(date, "glucose")}</div>
-    <div><b>Sleep:</b> ${colorValue("sleep", d.sleep)} ${trendArrow(date, "sleep")}</div>
-    <div><b>HRV:</b> ${colorValue("HRV", d.HRV)} ${trendArrow(date, "HRV")}</div>
-    <div><b>Mood:</b> ${colorValue("mood", d.mood)}</div>
+    <div>${colorValue("Walk (min)", d.walk)}</div>
+    <div>${colorValue("Strength (min)", d.strength)}</div>
+    <div>${colorValue("Treadmill (min)", d.treadmill)}</div>
+    <div>${colorValue("Calories", d.calories)}</div>
+    <div>${colorValue("Heart Rate", d.heartRate)}</div>
+    <div>${colorValue("Weight", d.weight)}</div>
+    <div>${colorValue("Glucose", d.glucose)}</div>
+    <div>${colorValue("Sleep (hrs)", d.sleep)}</div>
+    <div>${colorValue("HRV", d.hrv)}</div>
+    <div>${colorValue("Mood", d.mood)}</div>
 
     <h4>Blood Pressure</h4>
     ${
-      d.bloodPressure.length
-        ? d.bloodPressure.map(bp => `${colorValue("bloodPressure", bp)} (HR ${bp.heartRate}) – ${bp.note}`).join("<br>")
+      d.bloodPressure && d.bloodPressure.length
+        ? d.bloodPressure
+            .map(bp => `<span style="color:blue">${bp.systolic}/${bp.diastolic} (HR ${bp.heartRate}) – ${bp.note}</span>`)
+            .join("<br>")
         : "No BP readings"
     }
 
     <h4>Notes</h4>
     ${
-      d.notes.length
+      d.notes && d.notes.length
         ? d.notes.map(n => `• ${n}`).join("<br>")
         : "No notes"
     }
   `;
 }
 
-// =======================
-// Event Listener
-// =======================
-document.getElementById("datePicker").addEventListener("change", e => render(e.target.value));
-
-// =======================
-// Init
-// =======================
-loadData();
+// Initialize
+(async function init() {
+  const dailyLogs = await loadDailyLogs();
+  populateDatePicker(dailyLogs);
+  document.getElementById("datePicker").addEventListener("change", e => renderDashboard(dailyLogs, e.target.value));
+})();
