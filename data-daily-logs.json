@@ -961,3 +961,116 @@
     "heartRate": 0
   }
 }
+{
+  "2025-04-04": {
+    "bloodPressure": [
+      { "systolic": 130, "diastolic": 78, "heartRate": 83 },
+      { "systolic": 124, "diastolic": 76, "heartRate": 82 }
+    ],
+    "glucose": [{ "value": 24.2 }],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-04-05": {
+    "bloodPressure": [],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-04-06": {
+    "bloodPressure": [],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-04-07": {
+    "bloodPressure": [
+      { "systolic": 140, "diastolic": 68, "heartRate": 76 },
+      { "systolic": 128, "diastolic": 67, "heartRate": 75 }
+    ],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-04-08": {
+    "bloodPressure": [],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-04-09": {
+    "bloodPressure": [],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-04-10": {
+    "bloodPressure": [],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-04-11": {
+    "bloodPressure": [
+      { "systolic": 128, "diastolic": 73, "heartRate": 78 },
+      { "systolic": 127, "diastolic": 74, "heartRate": 79 }
+    ],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-04-12": {
+    "bloodPressure": [],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-04-13": {
+    "bloodPressure": [],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-04-14": {
+    "bloodPressure": [
+      { "systolic": 114, "diastolic": 62, "heartRate": 74 },
+      { "systolic": 120, "diastolic": 63, "heartRate": 73 }
+    ],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  }
+}
