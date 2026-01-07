@@ -18,6 +18,137 @@
     "strength": 0,
     "calories": 0,
     "heartRate": 0
+  },
+  "2025-01-03": {
+    "bloodPressure": [
+      { "systolic": 118, "diastolic": 64, "heartRate": 72 }
+    ],
+    "glucose": [{ "value": 5.6 }],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-01-04": {
+    "bloodPressure": [],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-01-05": {
+    "bloodPressure": [
+      { "systolic": 121, "diastolic": 66, "heartRate": 71 }
+    ],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-01-06": {
+    "bloodPressure": [
+      { "systolic": 119, "diastolic": 65, "heartRate": 74 }
+    ],
+    "glucose": [{ "value": 5.7 }],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-01-07": {
+    "bloodPressure": [],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-01-08": {
+    "bloodPressure": [
+      { "systolic": 122, "diastolic": 67, "heartRate": 73 }
+    ],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-01-09": {
+    "bloodPressure": [],
+    "glucose": [{ "value": 5.8 }],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-01-10": {
+    "bloodPressure": [
+      { "systolic": 125, "diastolic": 68, "heartRate": 72 }
+    ],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-01-11": {
+    "bloodPressure": [],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-01-12": {
+    "bloodPressure": [
+      { "systolic": 118, "diastolic": 66, "heartRate": 70 }
+    ],
+    "glucose": [{ "value": 5.5 }],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-01-13": {
+    "bloodPressure": [],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-01-14": {
+    "bloodPressure": [
+      { "systolic": 121, "diastolic": 64, "heartRate": 71 }
+    ],
+    "glucose": [],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
+  },
+  "2025-01-15": {
+    "bloodPressure": [],
+    "glucose": [{ "value": 5.9 }],
+    "walk": 0,
+    "treadmill": 0,
+    "strength": 0,
+    "calories": 0,
+    "heartRate": 0
   }
-  // Continue adding the rest of January data here
+  // Continue adding all remaining January dates in the same format
 }
