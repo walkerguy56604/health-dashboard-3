@@ -3,33 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <title>Daily Health Log</title>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      margin: 20px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 20px;
     }
-    label {
-      font-weight: bold;
+
+    h1 {
+      margin-bottom: 10px;
     }
-    .entry {
-      margin-top: 12px;
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .metric {
+      margin: 6px 0;
+      font-size: 16px;
+    }
+
+    canvas {
+      max-width: 100%;
     }
   </style>
 </head>
+
 <body>
 
   <h1>Daily Health Log</h1>
 
-  <label for="dateSelect">Select date:</label>
-  <select id="dateSelect"></select>
+  <label>
+    Select date:
+    <select id="dateSelect"></select>
+  </label>
 
-  <div class="entry"><strong>Calories:</strong> <span id="calories">—</span></div>
-  <div class="entry"><strong>Walk:</strong> <span id="walk">—</span></div>
-  <div class="entry"><strong>Strength:</strong> <span id="strength">—</span></div>
-  <div class="entry"><strong>Treadmill:</strong> <span id="treadmill">—</span></div>
-  <div class="entry"><strong>Blood Pressure:</strong> <span id="bp">—</span></div>
-  <div class="entry"><strong>Notes:</strong> <span id="notes">—</span></div>
+  <div class="card">
+    <div class="metric"><strong>Calories:</strong> <span id="calories">—</span></div>
+    <div class="metric"><strong>Walk:</strong> <span id="walk">—</span></div>
+    <div class="metric"><strong>Strength:</strong> <span id="strength">—</span></div>
+    <div class="metric"><strong>Treadmill:</strong> <span id="treadmill">—</span></div>
+    <div class="metric"><strong>Blood Pressure:</strong> <span id="bp">—</span></div>
+    <div class="metric"><strong>Notes:</strong> <span id="notes">—</span></div>
+  </div>
+
+  <div class="card">
+    <canvas id="activityChart"></canvas>
+  </div>
 
   <script src="main.js"></script>
 </body>
