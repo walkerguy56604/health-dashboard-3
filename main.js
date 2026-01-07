@@ -1,135 +1,76 @@
 // main.js
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    // Load daily logs JSON
-    const response = await fetch("dailyLogs.json");
-    const dailyLogs = await response.json();
 
-    // Get the date selector and display elements
-    const dateSelect = document.getElementById("dateSelect");
-    const dashboard = document.getElementById("dashboard");
-    const chartCanvas = document.getElementById("healthChart").getContext("2d");
+// Load daily logs
+async function loadDailyLogs() {
+  const response = await fetch('dailyLogs.json');
+  const logs = await response.json();
+  return logs;
+}
 
-    // Populate date selector
-    Object.keys(dailyLogs).forEach(date => {
-      const option = document.createElement("option");
-      option.value = date;
-      option.textContent = date;
-      dateSelect.appendChild(option);
-    });
+// Function to generate trend arrow
+function trendArrow(value, previous) {
+  if (previous === null || previous === undefined) return '';
+  if (value > previous) return '↑';
+  if (value < previous) return '↓';
+  return '→';
+}
 
-    // Function to display metrics
-    function displayMetrics(date) {
-      const data = dailyLogs[date];
-      if (!data) return;
+// Function to render daily metrics
+function renderDailyMetrics(logs) {
+  const container = document.getElementById('dashboard');
+  container.innerHTML = '';
 
-      // Clear dashboard
-      dashboard.innerHTML = "";
+  const dates = Object.keys(logs).sort();
+  let prev = {};
 
-      // Metrics to display
-      const metrics = [
-        { label: "Walk", value: data.walk, color: "green" },
-        { label: "Strength", value: data.strength, color: "red" },
-        { label: "Treadmill", value: data.treadmill, color: "orange" },
-        { label: "Calories", value: data.calories, color: "limegreen" },
-        { label: "Heart Rate", value: data.heartRate, color: "blue" },
-        { label: "Weight", value: data.weight, color: "purple" },
-        { label: "Glucose", value: data.glucose, color: "darkorange" },
-        { label: "Sleep", value: data.sleep, color: "teal" },
-        { label: "HRV", value: data.HRV, color: "pink" },
-        { label: "Mood", value: data.mood, color: "gold" }
-      ];
+  dates.forEach(date => {
+    const day = logs[date];
+    const div = document.createElement('div');
+    div.className = 'daily-entry';
+    
+    const walkArrow = trendArrow(day.walk, prev.walk);
+    const strengthArrow = trendArrow(day.strength, prev.strength);
+    const treadmillArrow = trendArrow(day.treadmill, prev.treadmill);
+    const caloriesArrow = trendArrow(day.calories, prev.calories);
+    const hrArrow = trendArrow(day.heartRate, prev.heartRate);
 
-      metrics.forEach(m => {
-        const p = document.createElement("p");
-        p.textContent = `${m.label}: ${m.value !== null ? m.value : "No data"}`;
-        p.style.color = m.color;
-        dashboard.appendChild(p);
-      });
+    div.innerHTML = `
+      <h3>${date}</h3>
+      <p><span style="color:green;">Walk: ${day.walk} ${walkArrow}</span></p>
+      <p><span style="color:red;">Strength: ${day.strength} ${strengthArrow}</span></p>
+      <p><span style="color:blue;">Treadmill: ${day.treadmill} ${treadmillArrow}</span></p>
+      <p><span style="color:orange;">Calories: ${day.calories} ${caloriesArrow}</span></p>
+      <p><span style="color:purple;">Heart Rate: ${day.heartRate || '—'} ${hrArrow}</span></p>
+      <p><span style="color:blue;">Blood Pressure: ${
+        day.bloodPressure.length > 0
+          ? day.bloodPressure.map(bp => `${bp.systolic}/${bp.diastolic} (HR ${bp.heartRate}) • ${bp.note}`).join(' • ')
+          : 'No readings'
+      }</span></p>
+      <p>Weight: ${day.weight || '—'}</p>
+      <p>Glucose: ${day.glucose || '—'}</p>
+      <p>Sleep: ${day.sleep || '—'}</p>
+      <p>HRV: ${day.HRV || '—'}</p>
+      <p>Mood: ${day.mood || '—'}</p>
+      <hr/>
+    `;
 
-      // Blood Pressure
-      if (data.bloodPressure && data.bloodPressure.length > 0) {
-        const bpHeader = document.createElement("p");
-        bpHeader.textContent = "Blood Pressure:";
-        bpHeader.style.fontWeight = "bold";
-        dashboard.appendChild(bpHeader);
+    container.appendChild(div);
 
-        data.bloodPressure.forEach(bp => {
-          const bpEntry = document.createElement("p");
-          bpEntry.textContent = `${bp.systolic}/${bp.diastolic} (HR ${bp.heartRate}) • ${bp.note}`;
-          dashboard.appendChild(bpEntry);
-        });
-      }
-
-      // Notes
-      if (data.notes && data.notes.length > 0) {
-        const notesHeader = document.createElement("p");
-        notesHeader.textContent = "Notes:";
-        notesHeader.style.fontWeight = "bold";
-        dashboard.appendChild(notesHeader);
-
-        data.notes.forEach(note => {
-          const noteEntry = document.createElement("p");
-          noteEntry.textContent = `- ${note}`;
-          dashboard.appendChild(noteEntry);
-        });
-      }
-    }
-
-    // Initial display
-    const firstDate = Object.keys(dailyLogs)[0];
-    displayMetrics(firstDate);
-    dateSelect.value = firstDate;
-
-    // Update on date change
-    dateSelect.addEventListener("change", e => displayMetrics(e.target.value));
-
-    // Prepare chart data
-    const chartData = {
-      labels: Object.keys(dailyLogs),
-      datasets: [
-        {
-          label: "Walk",
-          data: Object.values(dailyLogs).map(d => d.walk),
-          backgroundColor: "green"
-        },
-        {
-          label: "Strength",
-          data: Object.values(dailyLogs).map(d => d.strength),
-          backgroundColor: "red"
-        },
-        {
-          label: "Treadmill",
-          data: Object.values(dailyLogs).map(d => d.treadmill),
-          backgroundColor: "orange"
-        },
-        {
-          label: "Calories",
-          data: Object.values(dailyLogs).map(d => d.calories),
-          backgroundColor: "limegreen"
-        },
-        {
-          label: "Weight",
-          data: Object.values(dailyLogs).map(d => d.weight || 0),
-          backgroundColor: "purple"
-        }
-      ]
+    // Save current metrics for trend comparison
+    prev = {
+      walk: day.walk,
+      strength: day.strength,
+      treadmill: day.treadmill,
+      calories: day.calories,
+      heartRate: day.heartRate
     };
+  });
+}
 
-    // Render bar chart using Chart.js
-    new Chart(chartCanvas, {
-      type: "bar",
-      data: chartData,
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: "top" },
-          title: { display: true, text: "Daily Metrics Overview" }
-        }
-      }
-    });
+// Initialize dashboard
+async function initDashboard() {
+  const logs = await loadDailyLogs();
+  renderDailyMetrics(logs);
+}
 
-  } catch (err) {
-    console.error("Error loading daily logs:", err);
-  }
-});
+initDashboard();
