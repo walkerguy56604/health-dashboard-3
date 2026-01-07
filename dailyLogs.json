@@ -5,67 +5,64 @@
     "treadmill": 20,
     "calories": 22,
     "heartRate": 92,
-    "weight": 70.5,
-    "glucose": 95,
-    "sleep": 7.5,
-    "HRV": 65,
-    "mood": 8,
     "bloodPressure": [
       { "systolic": 127, "diastolic": 57, "heartRate": 91, "note": "Post AM strength" },
       { "systolic": 128, "diastolic": 72, "heartRate": 97, "note": "Post treadmill" },
       { "systolic": 136, "diastolic": 67, "heartRate": 93, "note": "Post PM strength" },
       { "systolic": 116, "diastolic": 64, "heartRate": 92, "note": "Post PM treadmill" }
     ],
-    "notes": []
+    "notes": [],
+    "weight": null,
+    "glucose": null,
+    "sleep": null,
+    "HRV": null,
+    "mood": null
   },
-
   "2026-01-03": {
     "walk": 5,
     "strength": 0,
     "treadmill": 0,
     "calories": 0,
     "heartRate": null,
-    "weight": 70.2,
-    "glucose": 97,
-    "sleep": 7.0,
-    "HRV": 60,
-    "mood": 7,
     "bloodPressure": [],
-    "notes": ["Morning 5-minute walk, non-Siri"]
+    "notes": ["Morning 5-minute walk, non-Siri"],
+    "weight": null,
+    "glucose": null,
+    "sleep": null,
+    "HRV": null,
+    "mood": null
   },
-
   "2026-01-04": {
     "walk": 35,
     "strength": 30,
     "treadmill": 10,
     "calories": 12,
     "heartRate": 102,
-    "weight": 70.6,
-    "glucose": 94,
-    "sleep": 8.0,
-    "HRV": 68,
-    "mood": 9,
     "bloodPressure": [
       { "systolic": 132, "diastolic": 80, "heartRate": 66, "note": "Post strength training" }
     ],
-    "notes": ["Morning Siri walk", "Afternoon treadmill"]
+    "notes": ["Morning Siri walk", "Afternoon treadmill"],
+    "weight": null,
+    "glucose": null,
+    "sleep": null,
+    "HRV": null,
+    "mood": null
   },
-
   "2026-01-05": {
     "walk": 10,
     "strength": 18,
     "treadmill": 10,
     "calories": 160,
     "heartRate": 85,
-    "weight": 70.4,
-    "glucose": 96,
-    "sleep": 7.5,
-    "HRV": 64,
-    "mood": 8,
     "bloodPressure": [
       { "systolic": 139, "diastolic": 70, "heartRate": 84, "note": "Post strength" },
       { "systolic": 131, "diastolic": 67, "heartRate": 85, "note": "Post treadmill" }
     ],
-    "notes": ["Morning Siri walk", "Morning non-Siri walk"]
+    "notes": ["Morning Siri walk", "Morning non-Siri walk"],
+    "weight": null,
+    "glucose": null,
+    "sleep": null,
+    "HRV": null,
+    "mood": null
   }
 }
