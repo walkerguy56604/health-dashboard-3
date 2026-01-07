@@ -45,6 +45,21 @@ function populateDatePicker() {
 }
 
 // =======================
+// Trend helper
+// =======================
+function trendArrow(date, metric) {
+  const dates = Object.keys(dailyLogs).sort();
+  const idx = dates.indexOf(date);
+  if (idx <= 0) return ""; // no previous day
+  const prevValue = dailyLogs[dates[idx - 1]][metric];
+  const currValue = dailyLogs[date][metric];
+  if (currValue == null || prevValue == null) return "";
+  if (currValue > prevValue) return "↑";
+  if (currValue < prevValue) return "↓";
+  return "→";
+}
+
+// =======================
 // Color coding helper
 // =======================
 function colorValue(metric, value) {
@@ -96,15 +111,15 @@ function render(date) {
 
   out.innerHTML = `
     <h3>${date}</h3>
-    <div><b>Walk:</b> ${d.walk ?? "—"} min</div>
-    <div><b>Strength:</b> ${d.strength ?? "—"} min</div>
-    <div><b>Treadmill:</b> ${d.treadmill ?? "—"} min</div>
-    <div><b>Calories:</b> ${d.calories ?? "—"}</div>
-    <div><b>Heart Rate:</b> ${colorValue("heartRate", d.heartRate)}</div>
-    <div><b>Weight:</b> ${colorValue("weight", d.weight)}</div>
-    <div><b>Glucose:</b> ${colorValue("glucose", d.glucose)}</div>
-    <div><b>Sleep:</b> ${colorValue("sleep", d.sleep)}</div>
-    <div><b>HRV:</b> ${colorValue("HRV", d.HRV)}</div>
+    <div><b>Walk:</b> ${d.walk ?? "—"} min ${trendArrow(date, "walk")}</div>
+    <div><b>Strength:</b> ${d.strength ?? "—"} min ${trendArrow(date, "strength")}</div>
+    <div><b>Treadmill:</b> ${d.treadmill ?? "—"} min ${trendArrow(date, "treadmill")}</div>
+    <div><b>Calories:</b> ${d.calories ?? "—"} ${trendArrow(date, "calories")}</div>
+    <div><b>Heart Rate:</b> ${colorValue("heartRate", d.heartRate)} ${trendArrow(date, "heartRate")}</div>
+    <div><b>Weight:</b> ${colorValue("weight", d.weight)} ${trendArrow(date, "weight")}</div>
+    <div><b>Glucose:</b> ${colorValue("glucose", d.glucose)} ${trendArrow(date, "glucose")}</div>
+    <div><b>Sleep:</b> ${colorValue("sleep", d.sleep)} ${trendArrow(date, "sleep")}</div>
+    <div><b>HRV:</b> ${colorValue("HRV", d.HRV)} ${trendArrow(date, "HRV")}</div>
     <div><b>Mood:</b> ${colorValue("mood", d.mood)}</div>
 
     <h4>Blood Pressure</h4>
