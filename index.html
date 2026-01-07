@@ -1,34 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Health Dashboard</title>
+  <meta charset="UTF-8" />
+  <title>Daily Health Log</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; }
-    h1 { text-align: center; }
-    #dashboard { max-width: 1000px; margin: auto; }
-    canvas { background: #fff; border: 1px solid #ccc; margin-top: 20px; }
-    .logs { margin-top: 20px; }
-    .logs div { margin-bottom: 5px; }
-    .green { color: green; }
-    .red { color: red; }
-    .blue { color: blue; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 20px;
+    }
+    label {
+      font-weight: bold;
+    }
+    .entry {
+      margin-top: 12px;
+    }
   </style>
-  <!-- Include Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <h1>Health Dashboard</h1>
-  <div id="dashboard">
-    <label for="dateSelect">Select Date:</label>
-    <select id="dateSelect"></select>
 
-    <canvas id="barChart" width="800" height="400"></canvas>
-    <canvas id="lineChart" width="800" height="400"></canvas>
+  <h1>Daily Health Log</h1>
 
-    <div class="logs" id="logs"></div>
-  </div>
+  <label for="dateSelect">Select date:</label>
+  <select id="dateSelect"></select>
+
+  <div class="entry"><strong>Calories:</strong> <span id="calories">—</span></div>
+  <div class="entry"><strong>Walk:</strong> <span id="walk">—</span></div>
+  <div class="entry"><strong>Strength:</strong> <span id="strength">—</span></div>
+  <div class="entry"><strong>Treadmill:</strong> <span id="treadmill">—</span></div>
+  <div class="entry"><strong>Blood Pressure:</strong> <span id="bp">—</span></div>
+  <div class="entry"><strong>Notes:</strong> <span id="notes">—</span></div>
 
   <script src="main.js"></script>
 </body>
