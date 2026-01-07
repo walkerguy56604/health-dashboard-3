@@ -6,53 +6,52 @@
   <title>Health Dashboard</title>
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Link to main.js -->
+  <script defer src="main.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
-      background-color: #f0f0f0;
+      background-color: #f9f9f9;
+      color: #222;
     }
-    h1 { text-align: center; }
-    .dashboard {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      margin-bottom: 30px;
+    h1 {
+      text-align: center;
+      color: #333;
     }
-    .metric {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    #dashboard {
+      max-width: 1000px;
+      margin: auto;
     }
-    .metric span { font-weight: bold; }
-    .arrows { font-size: 14px; margin-left: 5px; }
-    #chartContainer { width: 100%; max-width: 900px; margin: auto; }
+    canvas {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+      padding: 10px;
+    }
+    .logs {
+      margin-top: 30px;
+    }
+    .log-entry {
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+    }
+    .log-entry span {
+      display: inline-block;
+      min-width: 120px;
+    }
   </style>
 </head>
 <body>
   <h1>Health Dashboard</h1>
-  <div>
-    <label for="selectDate">Select Date:</label>
-    <input type="date" id="selectDate">
+  <div id="dashboard">
+    <label for="select-date">Select Date:</label>
+    <select id="select-date"></select>
+
+    <canvas id="barChart" width="800" height="400"></canvas>
+    <canvas id="lineChart" width="800" height="400"></canvas>
+
+    <div class="logs" id="logEntries"></div>
   </div>
-  <div class="dashboard">
-    <div class="metric" id="walk">Walk: <span>0</span></div>
-    <div class="metric" id="strength">Strength: <span>0</span></div>
-    <div class="metric" id="treadmill">Treadmill: <span>0</span></div>
-    <div class="metric" id="calories">Calories: <span>0</span></div>
-    <div class="metric" id="heartRate">Heart Rate: <span>0</span></div>
-    <div class="metric" id="weight">Weight: <span>0</span></div>
-    <div class="metric" id="glucose">Glucose: <span>0</span></div>
-    <div class="metric" id="sleep">Sleep: <span>0</span></div>
-    <div class="metric" id="HRV">HRV: <span>0</span></div>
-    <div class="metric" id="mood">Mood: <span>0</span></div>
-    <div class="metric" id="bloodPressure">Blood Pressure: <span>0/0</span></div>
-    <div class="metric" id="notes">Notes: <span>None</span></div>
-  </div>
-  <div id="chartContainer">
-    <canvas id="healthChart"></canvas>
-  </div>
-  <script src="main.js"></script>
 </body>
 </html>
