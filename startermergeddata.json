@@ -51,4 +51,4 @@
   "2025-07-10": { "bloodPressure": [{ "systolic": 119, "diastolic": 59, "heartRate": 78 }, { "systolic": 117, "diastolic": 61, "heartRate": 75 }], "glucose": [{ "value": 5.4 }], "walk": 0, "treadmill": 0, "strength": 0, "calories": 0, "heartRate": 0 },
   "2025-07-13": { "bloodPressure": [{ "systolic": 111, "diastolic": 63, "heartRate": 81 }], "glucose": [{ "value": 6.2 }], "walk": 0, "treadmill": 0, "strength": 0, "calories": 0, "heartRate": 0 },
   "2025-07-15": { "bloodPressure": [{ "systolic": 133, "diastolic": 69, "heartRate": 83 }, { "systolic": 128, "diastolic": 67, "heartRate": 81 }], "glucose": [], "walk": 0, "treadmill": 0, "strength": 0, "calories": 0, "heartRate": 0 },
-  "2025-07-17": { "bloodPressure": [{ "systolic": 103, "diast
+  "2025-07-17": { "bloodPressure": [{ "systolic": 103, "diastolic"
