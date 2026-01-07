@@ -1,48 +1,46 @@
-function updateDashboard(date) {
-  const data = dailyLogs[date];
-  if (!data) return;
+let dailyLogs = {};
 
-  const logsDiv = document.getElementById('logs');
+fetch("dailyLogs.json")
+  .then(response => response.json())
+  .then(data => {
+    dailyLogs = data;
+    populateDates();
+  })
+  .catch(error => {
+    console.error("Failed to load dailyLogs.json", error);
+  });
 
-  // ----- Blood Pressure Rendering -----
-  let bpHtml = '<div><strong>Blood Pressure:</strong></div>';
+function populateDates() {
+  const select = document.getElementById("dateSelect");
+  select.innerHTML = "";
 
-  if (data.bloodPressure && data.bloodPressure.length > 0) {
-    bpHtml += '<ul>';
-    data.bloodPressure.forEach(bp => {
-      bpHtml += `
-        <li>
-          ${bp.systolic}/${bp.diastolic}
-          ${bp.heartRate ? `(HR ${bp.heartRate})` : ''}
-          ${bp.note ? `– <em>${bp.note}</em>` : ''}
-        </li>
-      `;
-    });
-    bpHtml += '</ul>';
-  } else {
-    bpHtml += '<div>No BP readings recorded</div>';
+  Object.keys(dailyLogs).forEach(date => {
+    const option = document.createElement("option");
+    option.value = date;
+    option.textContent = date;
+    select.appendChild(option);
+  });
+
+  select.addEventListener("change", () => {
+    showLog(select.value);
+  });
+
+  // load first date automatically
+  const firstDate = Object.keys(dailyLogs)[0];
+  if (firstDate) {
+    select.value = firstDate;
+    showLog(firstDate);
   }
+}
 
-  // ----- Main Log Output -----
-  logsDiv.innerHTML = `
-    <div>Walk: <span class="green">${data.walk}</span> mins</div>
-    <div>Strength: <span class="red">${data.strength}</span> mins</div>
-    <div>Treadmill: <span class="green">${data.treadmill}</span> mins</div>
-    <div>Calories: <span class="green">${data.calories}</span> kcal</div>
-    <div>Heart Rate: <span class="blue">${data.heartRate ?? '-'}</span></div>
-    <div>Weight: ${data.weight ?? '-'}</div>
-    <div>Glucose: ${data.glucose ?? '-'}</div>
-    <div>Sleep: ${data.sleep ?? '-'}</div>
-    <div>HRV: ${data.hrv ?? '-'}</div>
-    <div>Mood: ${data.mood ?? '-'}</div>
+function showLog(date) {
+  const log = dailyLogs[date];
+  if (!log) return;
 
-    <hr>
-    ${bpHtml}
-
-    <hr>
-    <div><strong>Notes:</strong></div>
-    <div>${data.notes.length ? data.notes.join(', ') : 'None'}</div>
-  `;
-
-  // charts remain unchanged below 👇
+  document.getElementById("calories").textContent = log.calories ?? "—";
+  document.getElementById("walk").textContent = log.walk ?? "—";
+  document.getElementById("strength").textContent = log.strength ?? "—";
+  document.getElementById("treadmill").textContent = log.treadmill ?? "—";
+  document.getElementById("bp").textContent = log.bloodPressure ?? "—";
+  document.getElementById("notes").textContent = log.notes ?? "—";
 }
