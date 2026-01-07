@@ -1,11 +1,11 @@
 // =======================
-// main.js
+// main.js with graphs
 // =======================
 
 // Load the daily logs JSON
 async function loadDailyLogs() {
   try {
-    const response = await fetch("dailyLogs.json"); // Ensure this is your JSON file
+    const response = await fetch("dailyLogs.json");
     if (!response.ok) throw new Error("Failed to load dailyLogs.json");
     return await response.json();
   } catch (err) {
@@ -29,6 +29,7 @@ function populateDatePicker(dailyLogs) {
   if (dates.length > 0) {
     picker.value = dates[dates.length - 1];
     renderDashboard(dailyLogs, picker.value);
+    renderCharts(dailyLogs);
   }
 }
 
@@ -42,10 +43,9 @@ function renderDashboard(dailyLogs, date) {
     return;
   }
 
-  // Helper function for colored values
   const colorValue = (label, value) => {
     if (value === null || value === undefined) return `<span>${label}: —</span>`;
-    const color = typeof value === "number" && value > 100 ? "red" : "green"; // example
+    const color = typeof value === "number" && value > 100 ? "red" : "green";
     return `<span style="color:${color}"><b>${label}:</b> ${value}</span>`;
   };
 
@@ -80,7 +80,72 @@ function renderDashboard(dailyLogs, date) {
   `;
 }
 
+// =======================
+// Render Charts
+// =======================
+function renderCharts(dailyLogs) {
+  const dates = Object.keys(dailyLogs).sort();
+  const metrics = ["walk", "strength", "treadmill", "calories", "heartRate", "weight", "glucose", "sleep", "hrv"];
+  
+  // Prepare data for metrics chart
+  const metricDataSets = metrics.map(metric => ({
+    label: metric,
+    data: dates.map(date => dailyLogs[date][metric] ?? null),
+    borderColor: `hsl(${Math.random() * 360}, 70%, 50%)`,
+    fill: false,
+    tension: 0.2
+  }));
+
+  const metricsCtx = document.getElementById("metricsChart").getContext("2d");
+  new Chart(metricsCtx, {
+    type: "line",
+    data: {
+      labels: dates,
+      datasets: metricDataSets
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "bottom" },
+        tooltip: { mode: "index", intersect: false }
+      },
+      interaction: { mode: "nearest", axis: "x", intersect: false },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  // Prepare data for blood pressure chart
+  const systolicData = dates.map(date => {
+    const bps = dailyLogs[date].bloodPressure;
+    return bps.length ? bps[bps.length - 1].systolic : null;
+  });
+  const diastolicData = dates.map(date => {
+    const bps = dailyLogs[date].bloodPressure;
+    return bps.length ? bps[bps.length - 1].diastolic : null;
+  });
+
+  const bpCtx = document.getElementById("bpChart").getContext("2d");
+  new Chart(bpCtx, {
+    type: "line",
+    data: {
+      labels: dates,
+      datasets: [
+        { label: "Systolic", data: systolicData, borderColor: "red", fill: false },
+        { label: "Diastolic", data: diastolicData, borderColor: "blue", fill: false }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: "bottom" }, tooltip: { mode: "index" } },
+      interaction: { mode: "nearest", axis: "x", intersect: false },
+      scales: { y: { beginAtZero: false } }
+    }
+  });
+}
+
+// =======================
 // Initialize
+// =======================
 (async function init() {
   const dailyLogs = await loadDailyLogs();
   populateDatePicker(dailyLogs);
