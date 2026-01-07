@@ -1,18 +1,25 @@
-// Load daily logs
-let dailyLogs = {};
+// main.js
 
+// Path to your JSON file
+const dailyLogsPath = 'dailyLogs.json';
+
+let dailyLogs = {};
+let barChart, lineChart;
+
+// Load JSON data
 async function loadDailyLogs() {
   try {
-    const response = await fetch('dailyLogs.json');
-    dailyLogs = await response.json();
-    populateDateSelector();
+    const res = await fetch(dailyLogsPath);
+    dailyLogs = await res.json();
+    populateDateDropdown();
   } catch (err) {
-    console.error('Failed to load dailyLogs.json:', err);
+    console.error("Failed to load daily logs:", err);
   }
 }
 
-function populateDateSelector() {
-  const select = document.getElementById('selectDate');
+// Populate date dropdown
+function populateDateDropdown() {
+  const select = document.getElementById('select-date');
   select.innerHTML = '';
   Object.keys(dailyLogs).forEach(date => {
     const option = document.createElement('option');
@@ -20,76 +27,134 @@ function populateDateSelector() {
     option.textContent = date;
     select.appendChild(option);
   });
+
+  // Automatically select first date
   if (select.options.length > 0) {
-    select.value = select.options[0].value;
+    select.selectedIndex = 0;
     updateDashboard(select.value);
   }
-  select.addEventListener('change', () => updateDashboard(select.value));
-}
 
-function updateDashboard(date) {
-  const data = dailyLogs[date];
-  if (!data) return;
-
-  // Map elements
-  const metrics = {
-    walk: 'green',
-    strength: 'red',
-    treadmill: 'green',
-    calories: 'green',
-    heartRate: 'blue',
-    weight: 'purple',
-    glucose: 'orange',
-    sleep: 'teal',
-    HRV: 'pink',
-    mood: 'brown',
-    bloodPressure: 'blue',
-    notes: 'black'
-  };
-
-  for (const key in metrics) {
-    const el = document.getElementById(key);
-    const span = el.querySelector('span');
-    if (data[key] !== undefined) {
-      span.textContent = Array.isArray(data[key]) ? JSON.stringify(data[key]) : data[key];
-    } else {
-      span.textContent = '0';
-    }
-    el.style.color = metrics[key];
-  }
-
-  updateChart(date, data);
-}
-
-// Placeholder chart data
-let healthChart;
-function updateChart(date, data) {
-  const ctx = document.getElementById('healthChart').getContext('2d');
-  const labels = ['Walk','Strength','Treadmill','Calories','Heart Rate','Weight','Glucose','Sleep','HRV','Mood'];
-  const values = labels.map(l => data[l.toLowerCase()] || 0);
-  
-  if (healthChart) healthChart.destroy();
-  healthChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: `Metrics for ${date}`,
-        data: values,
-        backgroundColor: values.map((v, i) => ['green','red','green','green','blue','purple','orange','teal','pink','brown'][i])
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
+  select.addEventListener('change', () => {
+    updateDashboard(select.value);
   });
 }
 
+// Update dashboard for a given date
+function updateDashboard(date) {
+  const log = dailyLogs[date];
+
+  if (!log) return;
+
+  updateBarChart(log);
+  updateLineChart(log);
+  updateLogs(log);
+}
+
+// Bar Chart
+function updateBarChart(log) {
+  const ctx = document.getElementById('barChart').getContext('2d');
+
+  const data = {
+    labels: ['Walk', 'Strength', 'Treadmill', 'Calories'],
+    datasets: [{
+      label: 'Activity',
+      data: [log.walk, log.strength, log.treadmill, log.calories],
+      backgroundColor: ['green', 'red', 'blue', 'orange']
+    }]
+  };
+
+  if (barChart) {
+    barChart.data = data;
+    barChart.update();
+  } else {
+    barChart = new Chart(ctx, {
+      type: 'bar',
+      data: data,
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  }
+}
+
+// Line Chart (for BP, HR, Weight, Glucose)
+function updateLineChart(log) {
+  const ctx = document.getElementById('lineChart').getContext('2d');
+
+  // Placeholder arrays
+  const bpSystolic = log.bloodPressure.map(bp => bp.systolic || 0);
+  const bpDiastolic = log.bloodPressure.map(bp => bp.diastolic || 0);
+  const hr = log.bloodPressure.map(bp => bp.heartRate || log.heartRate || 0);
+  const weight = log.weight ? [log.weight] : [0];
+  const glucose = log.glucose ? [log.glucose] : [0];
+
+  const data = {
+    labels: log.bloodPressure.map((_, i) => `Reading ${i + 1}`),
+    datasets: [
+      { label: 'Systolic', data: bpSystolic, borderColor: 'blue', fill: false },
+      { label: 'Diastolic', data: bpDiastolic, borderColor: 'purple', fill: false },
+      { label: 'Heart Rate', data: hr, borderColor: 'red', fill: false },
+      { label: 'Weight', data: weight, borderColor: 'green', fill: false },
+      { label: 'Glucose', data: glucose, borderColor: 'orange', fill: false }
+    ]
+  };
+
+  if (lineChart) {
+    lineChart.data = data;
+    lineChart.update();
+  } else {
+    lineChart = new Chart(ctx, {
+      type: 'line',
+      data: data,
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: true },
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  }
+}
+
+// Update logs below chart
+function updateLogs(log) {
+  const container = document.getElementById('logEntries');
+  container.innerHTML = '';
+
+  // Blood Pressure Entries
+  if (log.bloodPressure.length > 0) {
+    log.bloodPressure.forEach((bp, i) => {
+      const div = document.createElement('div');
+      div.className = 'log-entry';
+      div.innerHTML = `<span>BP Reading ${i + 1}:</span> ${bp.systolic}/${bp.diastolic} HR:${bp.heartRate} Note: ${bp.note || '-'}`;
+      container.appendChild(div);
+    });
+  } else {
+    const div = document.createElement('div');
+    div.className = 'log-entry';
+    div.textContent = 'No blood pressure recorded';
+    container.appendChild(div);
+  }
+
+  // Notes
+  if (log.notes.length > 0) {
+    log.notes.forEach(note => {
+      const div = document.createElement('div');
+      div.className = 'log-entry';
+      div.innerHTML = `<span>Note:</span> ${note}`;
+      container.appendChild(div);
+    });
+  }
+}
+
 // Initialize
-loadDailyLogs();
+window.addEventListener('DOMContentLoaded', loadDailyLogs);
