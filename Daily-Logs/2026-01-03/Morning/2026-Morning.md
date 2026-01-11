@@ -1,3 +1,7 @@
-## Morning
-- **Strength Training:** 08:55 – 09:10  
-- **Blood Pressure:** Not recorded
+# January 3, 2026 - Morning
+
+## Strength Training
+- 8:55 AM – 9:10 AM
+
+## Blood Pressure
+- Not recorded
