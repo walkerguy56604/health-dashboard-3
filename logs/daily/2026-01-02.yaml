@@ -1,0 +1,114 @@
+// DailyHealthLog Scriptable Mock with GitHub Push
+
+// ------------------
+// Step 1: Prompts
+// ------------------
+let strengthStart = await Prompt.string("Enter strength training START (HH:MM)", "08:00")
+let strengthEnd = await Prompt.string("Enter strength training END (HH:MM)", "08:12")
+let restEnd = await Prompt.string("Enter rest END (HH:MM)", "08:16")
+
+let walkName = await Prompt.string("Enter walk name/location", "Surrey Walk")
+let walkStart = await Prompt.string("Enter walk START (HH:MM)", "15:48")
+let walkEnd = await Prompt.string("Enter walk END (HH:MM)", "15:53")
+let walkDuration = 5
+
+let bpReadings = []
+for (let i = 1; i <= 3; i++) {
+  let input = await Prompt.string(`Enter BP reading #${i} (Systolic/Diastolic/HR)`, i==1?"128/70/83":i==2?"127/67/78":"132/67/79")
+  let parts = input.split("/")
+  let systolic = parseInt(parts[0])
+  let diastolic = parseInt(parts[1])
+  let hr = parseInt(parts[2])
+  let level = "normal"
+  if (systolic >= 140 || diastolic >= 90) level = "high"
+  else if (systolic >= 120 || diastolic >= 70) level = "medium"
+  bpReadings.push({systolic, diastolic, hr, level})
+}
+
+// ------------------
+// Step 2: Calculations
+// ------------------
+let avgSystolic = Math.round(bpReadings.reduce((sum, r) => sum + r.systolic, 0)/bpReadings.length)
+let avgDiastolic = Math.round(bpReadings.reduce((sum, r) => sum + r.diastolic, 0)/bpReadings.length)
+let avgHR = Math.round(bpReadings.reduce((sum, r) => sum + r.hr, 0)/bpReadings.length)
+
+// ------------------
+// Step 3: YAML Formatting
+// ------------------
+let yaml = `
+date: 2026-01-12
+
+morning:
+  strength:
+    start: "${strengthStart}"
+    end: "${strengthEnd}"
+    rest_end: "${restEnd}"
+  walks:
+    - name: "${walkName}"
+      start: "${walkStart}"
+      end: "${walkEnd}"
+      duration_minutes: ${walkDuration}
+
+  blood_pressure:
+    readings:
+${bpReadings.map(r => `      - systolic: ${r.systolic}\n        diastolic: ${r.diastolic}\n        hr: ${r.hr}\n        level: "${r.level}"`).join("\n")}
+    averages:
+      systolic: ${avgSystolic}
+      diastolic: ${avgDiastolic}
+      hr: ${avgHR}
+`
+
+// ------------------
+// Step 4: Save Locally (Optional Preview)
+// ------------------
+let fm = FileManager.local()
+let dir = fm.documentsDirectory() + "/logs/daily"
+fm.ensureDirectory(dir)
+let filePath = dir + "/2026-01-12.yaml"
+fm.writeString(filePath, yaml)
+QuickLook.present(yaml)
+
+// ------------------
+// Step 5: GitHub Push
+// ------------------
+
+// Your GitHub settings
+const token = "YOUR_PERSONAL_ACCESS_TOKEN"   // or device flow token
+const owner = "YOUR_GITHUB_USERNAME"
+const repo = "EXISTING_REPO_NAME"
+const path = "logs/daily/2026-01-12.yaml"
+const message = "Add Jan 12 health log"
+
+// Encode YAML as base64 for GitHub API
+let base64Content = Data.fromString(yaml).toBase64String()
+
+// Prepare GitHub API URL
+let url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`
+
+// Check if file exists to determine PUT vs POST
+let reqCheck = new Request(url)
+reqCheck.headers = { "Authorization": `token ${token}` }
+reqCheck.method = "GET"
+let resCheck
+try {
+  resCheck = await reqCheck.loadJSON()
+} catch(e) {
+  resCheck = null
+}
+
+// Build request for create/update
+let req = new Request(url)
+req.headers = {
+  "Authorization": `token ${token}`,
+  "Content-Type": "application/json"
+}
+req.method = "PUT"
+let body = { 
+  message: message,
+  content: base64Content
+}
+if (resCheck && resCheck.sha) body.sha = resCheck.sha // needed for updates
+req.body = JSON.stringify(body)
+
+let response = await req.loadJSON()
+console.log("GitHub push response:", response)
